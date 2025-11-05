@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinton - Surveying Platforms</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        .main-content {
+            min-width: 0;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border-top: 4px solid #CE0E2D;
+        }
+
+        .header h1 {
+            color: #CE0E2D;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .platform-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #CE0E2D;
+        }
+
+        .platform-icon {
+            width: 40px;
+            height: 40px;
+            background: #CE0E2D;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+        }
+
+        .platform-name {
+            color: #333;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .links-list {
+            list-style: none;
+        }
+
+        .link-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .link-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .link-button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .link-button:hover {
+            background: #CE0E2D;
+            color: white;
+            border-color: #CE0E2D;
+            transform: translateX(4px);
+        }
+
+        .link-with-info {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .link-with-info .link-button {
+            flex: 1;
+        }
+
+        .info-btn {
+            background: #CE0E2D;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .info-btn:hover {
+            background: #a00a24;
+            transform: scale(1.05);
+        }
+
+        /* Info Panel Overlay */
+        .info-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-overlay.active {
+            display: flex;
+        }
+
+        .info-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .info-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #CE0E2D;
+        }
+
+        .info-panel-title {
+            color: #CE0E2D;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #CE0E2D;
+            color: white;
+            border-color: #CE0E2D;
+        }
+
+        .info-panel-content {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Alerts Sidebar */
+        .alerts-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .alerts-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #CE0E2D;
+            margin-bottom: 1rem;
+        }
+
+        .alerts-title {
+            color: #CE0E2D;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-icon {
+            width: 24px;
+            height: 24px;
+            background: #CE0E2D;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .refresh-btn {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #CE0E2D;
+            color: white;
+            border-color: #CE0E2D;
+        }
+
+        .alerts-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f8f8f8;
+            padding: 0;
+            border-radius: 8px;
+        }
+
+        .alerts-content:empty::before {
+            content: 'No alerts to display';
+            color: #999;
+            font-style: italic;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: block;
+            padding: 1rem;
+        }
+
+        .alert-project {
+            border-bottom: 3px solid #CE0E2D;
+            padding: 1rem;
+            background: white;
+            margin-bottom: 1rem;
+        }
+
+        .alert-project:last-child {
+            margin-bottom: 0;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .project-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #CE0E2D;
+        }
+
+        .alarm-count {
+            background: #CE0E2D;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .alert-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-number {
+            color: #999;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .alert-location {
+            color: #CE0E2D;
+            font-weight: 600;
+        }
+
+        .alert-issue {
+            color: #333;
+        }
+
+        .alert-time {
+            color: #666;
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+
+        .report-header {
+            background: #CE0E2D;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .report-meta {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .last-updated {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 0.75rem;
+            text-align: center;
+        }
+
+        .loading {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .error {
+            color: #CE0E2D;
+            font-size: 0.875rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .alerts-sidebar {
+                position: relative;
+                top: 0;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <h1>Clinton Monitoring Dashboard</h1>
+                <p>Quick access to all monitoring and data platforms</p>
+            </div>
+
+            <div class="platforms-grid">
+
+                <!-- GEOvis -->
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">G</div>
+                        <h2 class="platform-name">GEOvis</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <a href="https://geovis.io/" class="link-button" target="_blank">GEOvis Portal</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Leica -->
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">L</div>
+                        <h2 class="platform-name">Leica</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <a href="https://geomosnow.leica-geosystems.com/GeoMoSNow/Login.aspx" class="link-button" target="_blank">GeoMoS Now</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://login.teamviewer.com/nav/home" class="link-button" target="_blank">GeoMoS Monitor via TeamViewer</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- ProjektNAV -->
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">P</div>
+                        <h2 class="platform-name">ProjektNAV</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <a href="https://projektnav.net/admin/login-refresh.dh" class="link-button" target="_blank">GBG Hisingsbron</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Proqio -->
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">Q</div>
+                        <h2 class="platform-name">Proqio</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <a href="https://ermiddleeast.proqio.com/" class="link-button" target="_blank">Proqio Europe & Middle East</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://ws1.proqio.com/" class="link-button" target="_blank">Proqio WS1</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Senceive -->
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">S</div>
+                        <h2 class="platform-name">Senceive</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <a href="https://clinton.senceive.com/Monitor/SiteMonitor.aspx" class="link-button" target="_blank">Site Monitor</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://senceivecore.wm4.senceive.com/" class="link-button" target="_blank">New Site Monitor</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="https://senceive.io/" class="link-button" target="_blank">Senceive IO</a>
+                        </li>
+                    </ul>
+                </div>                
+
+                <!-- Worldsensing -->
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">W</div>
+                        <h2 class="platform-name">Worldsensing</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <div class="link-with-info">
+                                <a href="https://loadsensing.wocs3.com/30473" class="link-button" target="_blank">Ballsered - Gateway 30473</a>
+                                <button class="info-btn" onclick="openInfoPanel('ballsered')">Info</button>
+                            </div>
+                        </li>
+                        <li class="link-item">
+                            <div class="link-with-info">
+                                <a href="https://loadsensing.wocs3.com/30753" class="link-button" target="_blank">Skurubron - Gateway 30753</a>
+                                <button class="info-btn" onclick="openInfoPanel('skurubron')">Info</button>
+                            </div>
+                        </li>
+                        <li class="link-item">
+                            <div class="link-with-info">
+                                <a href="https://loadsensing.wocs3.com/30770" class="link-button" target="_blank">Vargön - Gateway 30770</a>
+                                <button class="info-btn" onclick="openInfoPanel('vargon')">Info</button>
+                            </div>
+                        </li>
+                        <li class="link-item">
+                            <div class="link-with-info">
+                                <a href="https://loadsensing.wocs3.com/31477" class="link-button" target="_blank">Dalvägen 8 - Gateway 31477</a>
+                                <button class="info-btn" onclick="openInfoPanel('dalvagen')">Info</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>     
+                
+            </div>
+        </div>
+
+        <!-- Alerts Sidebar -->
+        <div class="alerts-sidebar">
+            <div class="alerts-header">
+                <div class="alerts-title">
+                    <div class="alert-icon">!</div>
+                    Alerts & Alarms
+                </div>
+                <button class="refresh-btn" onclick="loadAlerts()">Refresh</button>
+            </div>
+            <div class="alerts-content" id="alertsContent">
+                <div class="loading">Loading alerts...</div>
+            </div>
+            <div class="last-updated" id="lastUpdated"></div>
+        </div>
+
+        <div class="footer">
+            <p>Clinton Surveying & Monitoring Dashboard</p>
+        </div>
+    </div>
+
+    <!-- Info Panel Overlay -->
+    <div class="info-overlay" id="infoOverlay" onclick="closeInfoPanel(event)">
+        <div class="info-panel" onclick="event.stopPropagation()">
+            <div class="info-panel-header">
+                <h2 class="info-panel-title">Info</h2>
+                <button class="close-btn" onclick="closeInfoPanel()">Close</button>
+            </div>
+            <div class="info-panel-content" id="infoPanelContent">
+                <!-- Project info will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Info panel data - add your project details here later
+        const projectInfo = {
+            ballsered: {
+                title: "Ballsered - Gateway 30473",
+                content: "Project information will be added here."
+            },
+            skurubron: {
+                title: "Skurubron - Gateway 30753",
+                content: "Project information will be added here."
+            },
+            vargon: {
+                title: "Vargön - Gateway 30770",
+                content: "Project information will be added here."
+            },
+            dalvagen: {
+                title: "Dalvägen 8 - Gateway 31477",
+                content: "Project information will be added here."
+            }
+        };
+
+        function openInfoPanel(projectId) {
+            const overlay = document.getElementById('infoOverlay');
+            const content = document.getElementById('infoPanelContent');
+            const info = projectInfo[projectId];
+
+            if (info) {
+                content.innerHTML = `
+                    <h3 style="color: #CE0E2D; margin-bottom: 1rem;">${info.title}</h3>
+                    <p>${info.content}</p>
+                `;
+            }
+
+            overlay.classList.add('active');
+        }
+
+        function closeInfoPanel(event) {
+            const overlay = document.getElementById('infoOverlay');
+            overlay.classList.remove('active');
+        }
+
+        // Function to parse and format alerts
+        function parseAlerts(content) {
+            if (!content || content === 'No alerts available') {
+                return '<div class="loading">No alerts available</div>';
+            }
+
+            const lines = content.split('\n');
+            let html = '';
+            let currentProject = null;
+            let projectAlarms = [];
+            let reportInfo = {};
+
+            // Parse report header
+            for (let i = 0; i < Math.min(10, lines.length); i++) {
+                const line = lines[i].trim();
+                if (line.startsWith('Generated:')) {
+                    reportInfo.generated = line.replace('Generated:', '').trim();
+                }
+                if (line.startsWith('Total Projects:')) {
+                    reportInfo.totalProjects = line.replace('Total Projects:', '').trim();
+                }
+                if (line.startsWith('Total Alarms:')) {
+                    reportInfo.totalAlarms = line.replace('Total Alarms:', '').trim();
+                }
+            }
+
+            // Add report header
+            if (reportInfo.totalAlarms) {
+                html += `<div class="report-header">
+                    <div class="report-title">Total: ${reportInfo.totalAlarms} alarms across ${reportInfo.totalProjects} projects</div>
+                    <div class="report-meta">Generated: ${reportInfo.generated || 'Unknown'}</div>
+                </div>`;
+            }
+
+            // Parse projects and alarms
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                // Detect project header
+                if (line.startsWith('PROJECT:')) {
+                    // Save previous project if exists
+                    if (currentProject) {
+                        html += formatProject(currentProject, projectAlarms);
+                    }
+                    // Start new project
+                    currentProject = line.replace('PROJECT:', '').trim();
+                    projectAlarms = [];
+                } 
+                // Detect alarm count
+                else if (line.startsWith('Number of alarms:')) {
+                    const count = line.match(/\d+/);
+                    if (currentProject && count) {
+                        currentProject = { name: currentProject, count: count[0] };
+                    }
+                }
+                // Detect alarm items
+                else if (/^\d+\./.test(line.trim())) {
+                    projectAlarms.push(line.trim());
+                }
+            }
+
+            // Add last project
+            if (currentProject) {
+                html += formatProject(currentProject, projectAlarms);
+            }
+
+            return html || '<div class="loading">No formatted alerts available</div>';
+        }
+
+        function formatProject(project, alarms) {
+            const projectName = typeof project === 'object' ? project.name : project;
+            const alarmCount = typeof project === 'object' ? project.count : alarms.length;
+
+            let html = `<div class="alert-project">
+                <div class="project-header">
+                    <span class="project-name">${projectName}</span>
+                    <span class="alarm-count">${alarmCount} alarm${alarmCount !== '1' ? 's' : ''}</span>
+                </div>`;
+
+            alarms.forEach(alarm => {
+                html += formatAlarm(alarm);
+            });
+
+            html += '</div>';
+            return html;
+        }
+
+        function formatAlarm(alarm) {
+            // Parse alarm components
+            const numberMatch = alarm.match(/^(\d+)\./);
+            const number = numberMatch ? numberMatch[1] : '';
+
+            // Extract location/sensor/instrument
+            let location = '';
+            if (alarm.includes('Location:')) {
+                location = alarm.match(/Location:\s*([^|]+)/)?.[1]?.trim() || '';
+            } else if (alarm.includes('Sensor:')) {
+                location = alarm.match(/Sensor:\s*([^|]+)/)?.[1]?.trim() || '';
+            } else if (alarm.includes('Instrument:')) {
+                location = alarm.match(/Instrument:\s*([^|]+)/)?.[1]?.trim() || '';
+            } else if (alarm.includes('Locations:')) {
+                location = alarm.match(/Locations:\s*([^|]+)/)?.[1]?.trim() || '';
+            }
+
+            // Extract issue
+            const issueMatch = alarm.match(/Issue:\s*([^|]+?)(?:\s*\||$)/);
+            const issue = issueMatch ? issueMatch[1].trim() : '';
+
+            // Extract time (at the end)
+            const timeMatch = alarm.match(/Time:\s*(.+)$/);
+            const time = timeMatch ? timeMatch[1].trim() : '';
+
+            return `<div class="alert-item">
+                <span class="alert-number">${number}.</span>
+                <span class="alert-location">${location}</span>
+                <div class="alert-issue">${issue}</div>
+                <div class="alert-time">${time}</div>
+            </div>`;
+        }
+
+        // Function to load alerts from JSON file
+        async function loadAlerts() {
+            const alertsContent = document.getElementById('alertsContent');
+            const lastUpdated = document.getElementById('lastUpdated');
+            
+            try {
+                // Add timestamp AND random number to prevent any caching
+                const cacheBuster = new Date().getTime() + Math.random();
+                const response = await fetch(`alerts.json?v=${cacheBuster}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Could not load alerts file');
+                }
+                
+                const data = await response.json();
+                
+                // Parse and format the alerts
+                const formattedHTML = parseAlerts(data.content);
+                alertsContent.innerHTML = formattedHTML;
+                
+                // Display last updated time
+                lastUpdated.textContent = `Last updated: ${data.last_updated || 'Unknown'}`;
+                
+            } catch (error) {
+                alertsContent.innerHTML = `<div class="error">Unable to load alerts.<br>Make sure alerts.json exists and the server is running.</div>`;
+                lastUpdated.textContent = '';
+                console.error('Error loading alerts:', error);
+            }
+        }
+
+        // Load alerts when page loads
+        loadAlerts();
+
+        // Auto-refresh every 5 minutes (300000 ms)
+        setInterval(loadAlerts, 300000);
+    </script>
+</body>
+</html>
