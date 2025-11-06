@@ -1,0 +1,76 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2025-11-05 15:26:17
+Total Projects: 4
+Total Alarms: 22
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Dalvägen 8 Stagkraft
+Number of alarms: 1
+____________________________________________________________
+
+1. Locations: LC-157083, LC-157100, LC-157247 | Issue: Data reception | Time: 11/5/2025, 1:35:00 PM
+
+
+____________________________________________________________
+PROJECT: Halltippen
+Number of alarms: 1
+____________________________________________________________
+
+1. Location: Cant-FM3NT-50_01A9F4 | Issue: Data reception | Time: 11/5/2025, 8:10:00 AM
+
+
+____________________________________________________________
+PROJECT: Hisingsbron
+Number of alarms: 9
+____________________________________________________________
+
+1. Sensor: STN2 | Issue: LOC8 device problem The communication to LOC8 did repeatedly fail. The... | Time: 05.11.2025 04:05:02
+
+2. Sensor: STN2 | Issue: Not enough measurements for reference group calculation. 2/3 | Time: 05.11.2025 04:02:52
+
+3. Sensor: STN1 | Issue: Not enough measurements for reference group calculation. 0/6 | Time: 05.11.2025 00:00:41
+
+4. Sensor: STN2 | Issue: LOC8 device problem The communication to LOC8 did repeatedly fail. The... | Time: 04.11.2025 20:05:02
+
+5. Sensor: STN2 | Issue: Not enough measurements for reference group calculation. 2/3 | Time: 04.11.2025 20:02:30
+
+6. Sensor: STN1 | Issue: Not enough measurements for reference group calculation. 0/6 | Time: 04.11.2025 20:00:43
+
+7. Sensor: STN2 | Issue: LOC8 device problem The communication to LOC8 did repeatedly fail. The... | Time: 04.11.2025 16:20:02
+
+8. Sensor: STN2 | Issue: LOC8 device problem The communication to LOC8 did repeatedly fail. The... | Time: 04.11.2025 16:10:01
+
+9. Sensor: STN1 | Issue: Not enough measurements for reference group calculation. 0/6 | Time: 04.11.2025 16:00:42
+
+
+____________________________________________________________
+PROJECT: Södertälje Sluss o Klaffbro
+Number of alarms: 11
+____________________________________________________________
+
+1. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0105 | Time: 05.11.2025 15:16:34
+
+2. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0117 | Time: 05.11.2025 14:16:36
+
+3. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0101 | Time: 05.11.2025 13:16:31
+
+4. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0104 | Time: 05.11.2025 12:16:51
+
+5. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0108 | Time: 05.11.2025 11:16:28
+
+6. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0108 | Time: 05.11.2025 09:11:41
+
+7. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0113 | Time: 05.11.2025 08:16:40
+
+8. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0108 | Time: 05.11.2025 08:11:31
+
+9. Sensor: SSK_TS03 | Point: SSK_B01_M | Issue: Reference group observation residuals check failed HDist | Result: +0.0111 | Time: 05.11.2025 07:16:43
+
+10. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0132 | Time: 05.11.2025 07:16:43
+
+11. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: Reference group observation residuals check failed HDist | Result: -0.0109 | Time: 05.11.2025 06:16:27
+
