@@ -765,7 +765,7 @@
             try {
                 // Add timestamp AND random number to prevent any caching
                 const cacheBuster = new Date().getTime() + Math.random();
-                const response = await fetch(`alerts.json?v=${cacheBuster}`, {
+                const response = await fetch(`https://dkr3000.github.io/Clinton_Dashboard/alerts.json?v=${cacheBuster}`, {
                     cache: 'no-store',
                     headers: {
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
