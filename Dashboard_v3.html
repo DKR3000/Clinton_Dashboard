@@ -531,7 +531,7 @@
                         </li>
                         <li class="link-item">
                             <div class="link-with-info">
-                                <a href="https://loadsensing.wocs3.com/30753" class="link-button" target="_blank">Skurubron - Gateway 30753</a>
+                                <a href="https://loadsensing.wocs3.com/30753" class="link-button" target="_blank">Lärje - Gateway 30753</a>
                                 <button class="info-btn" onclick="openInfoPanel('skurubron')">Info</button>
                             </div>
                         </li>
@@ -600,7 +600,7 @@
                 content: "chae7Eisu"
             },
             skurubron: {
-                title: "Skurubron - Gateway 30753",
+                title: "Lärje - Gateway 30753",
                 content: "thaaHoh9i"
             },
             vargon: {
@@ -765,7 +765,7 @@
             try {
                 // Add timestamp AND random number to prevent any caching
                 const cacheBuster = new Date().getTime() + Math.random();
-                const response = await fetch(`https://dkr3000.github.io/Clinton_Dashboard/alerts.json`, {
+                const response = await fetch(`https://dkr3000.github.io/Clinton_Dashboard/alerts.json?v=${cacheBuster}`, {
                     cache: 'no-store',
                     headers: {
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -801,5 +801,4 @@
         setInterval(loadAlerts, 3600000);
     </script>
 </body>
-
 </html>
