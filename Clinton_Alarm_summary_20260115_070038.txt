@@ -1,0 +1,94 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-01-15 07:00:38
+Total Projects: 6
+Total Alarms: 25
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Hammargårds ARV
+Number of alarms: 2
+____________________________________________________________
+
+1. [WDSensor] Hammargårds ARV | Site: Hammargårds ARV | Issue: Failed to deliver data
+
+2. [WDSensor] Hammargårds ARV | Site: Hammargårds ARV | Issue: Failed to deliver data
+
+
+____________________________________________________________
+PROJECT: Hisingsbron
+Number of alarms: 5
+____________________________________________________________
+
+1. Instrument: STN1 | Site: Hisingsbron | Issue: The communication device is online | Time: 15.01.2026 01:36:17
+
+2. Instrument: STN2 | Site: Hisingsbron | Issue: The communication device is online | Time: 15.01.2026 01:36:18
+
+3. Instrument: STN2 | Site: Hisingsbron | Issue: The communication device is offline | Time: 15.01.2026 01:36:00
+
+4. Instrument: STN1 | Site: Hisingsbron | Issue: The communication device is offline | Time: 15.01.2026 01:36:00
+
+5. Sensor: STN2 | Issue: Not enough measurements for reference group calculation. 2/3 | Time: 14.01.2026 12:02:25
+
+
+____________________________________________________________
+PROJECT: Kustkajen
+Number of alarms: 2
+____________________________________________________________
+
+1. [WDSensor] Kustkajen Göteborgs hamn | Site: Kustkajen Göteborgs hamn | Issue: Failed to deliver data
+
+2. [WDSensor] Kustkajen Göteborgs hamn | Site: Kustkajen Göteborgs hamn | Issue: Failed to deliver data
+
+
+____________________________________________________________
+PROJECT: Lerum Vändspår
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: 437+940 | Issue: Data reception | Time: 1/14/2026, 10:15:00 PM
+
+2. Location: 437+820_Ny | Issue: Data reception | Time: 1/14/2026, 8:45:00 PM
+
+
+____________________________________________________________
+PROJECT: Södertälje Sluss o Klaffbro
+Number of alarms: 12
+____________________________________________________________
+
+1. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 9 in 60 minutes | Time: 15.01.2026 06:00:05
+
+2. Sensor: SSK_TS03 | Point: SSK_23BY011 | Issue: No communication with sensor! | Time: 14.01.2026 13:44:14
+
+3. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 14.01.2026 13:43:53
+
+4. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 14.01.2026 13:43:32
+
+5. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: No communication with sensor! | Time: 14.01.2026 13:43:12
+
+6. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 5 in 60 minutes | Time: 14.01.2026 13:00:05
+
+7. Sensor: SSK_TS03 | Point: SSK_23BY012 | Issue: No communication with sensor! | Time: 14.01.2026 12:18:15
+
+8. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 14.01.2026 12:17:41
+
+9. Sensor: SSK_TS03 | Point: SSK_C73-1 | Issue: No communication with sensor! | Time: 14.01.2026 12:17:07
+
+10. Sensor: SSK_TS03 | Point: SSK_C73-19 | Issue: No communication with sensor! | Time: 14.01.2026 12:16:46
+
+11. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 14.01.2026 12:16:25
+
+12. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 14.01.2026 07:17:07
+
+
+____________________________________________________________
+PROJECT: Vargön
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: IPI # 2 (15 meter) (129364) | Issue: Data reception | Time: 1/14/2026, 9:15:00 PM
+
+2. Location: IPI # 2 (15 meter) (129364) | Issue: Data reception | Time: 1/14/2026, 6:55:00 PM
+
