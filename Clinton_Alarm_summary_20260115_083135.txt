@@ -1,0 +1,100 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-01-15 08:31:35
+Total Projects: 6
+Total Alarms: 28
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Hammargårds ARV
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: KP_C01 | Site: Hammargårds ARV | Issue: 70 sensors failed to deliver data in time
+
+2. Location: KP_C01 | Site: Hammargårds ARV | Issue: 96 sensors failed to deliver data in time
+
+
+____________________________________________________________
+PROJECT: Hisingsbron
+Number of alarms: 5
+____________________________________________________________
+
+1. Instrument: STN1 | Site: Hisingsbron | Issue: The communication device is online | Time: 15.01.2026 01:36:17
+
+2. Instrument: STN2 | Site: Hisingsbron | Issue: The communication device is online | Time: 15.01.2026 01:36:18
+
+3. Instrument: STN2 | Site: Hisingsbron | Issue: The communication device is offline | Time: 15.01.2026 01:36:00
+
+4. Instrument: STN1 | Site: Hisingsbron | Issue: The communication device is offline | Time: 15.01.2026 01:36:00
+
+5. Sensor: STN2 | Issue: Not enough measurements for reference group calculation. 2/3 | Time: 14.01.2026 12:02:25
+
+
+____________________________________________________________
+PROJECT: Kustkajen
+Number of alarms: 4
+____________________________________________________________
+
+1. Location: Prism | Site: Kustkajen Göteborgs hamn
+
+2. Location: Leveling | Site: Kustkajen Göteborgs hamn
+
+3. Location: Prism | Site: Kustkajen Göteborgs hamn | Issue: 134 sensors failed to deliver data in time
+
+4. Location: Leveling | Site: Kustkajen Göteborgs hamn | Issue: 164 sensors failed to deliver data in time
+
+
+____________________________________________________________
+PROJECT: Lerum Vändspår
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: 437+940 | Issue: Data reception | Time: 1/14/2026, 10:15:00 PM
+
+2. Location: 437+820_Ny | Issue: Data reception | Time: 1/14/2026, 8:45:00 PM
+
+
+____________________________________________________________
+PROJECT: Södertälje Sluss o Klaffbro
+Number of alarms: 13
+____________________________________________________________
+
+1. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 15.01.2026 07:16:56
+
+2. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 15.01.2026 07:16:25
+
+3. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 9 in 60 minutes | Time: 15.01.2026 06:00:05
+
+4. Sensor: SSK_TS03 | Point: SSK_23BY011 | Issue: No communication with sensor! | Time: 14.01.2026 13:44:14
+
+5. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 14.01.2026 13:43:53
+
+6. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 14.01.2026 13:43:32
+
+7. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: No communication with sensor! | Time: 14.01.2026 13:43:12
+
+8. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 5 in 60 minutes | Time: 14.01.2026 13:00:05
+
+9. Sensor: SSK_TS03 | Point: SSK_23BY012 | Issue: No communication with sensor! | Time: 14.01.2026 12:18:15
+
+10. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 14.01.2026 12:17:41
+
+11. Sensor: SSK_TS03 | Point: SSK_C73-1 | Issue: No communication with sensor! | Time: 14.01.2026 12:17:07
+
+12. Sensor: SSK_TS03 | Point: SSK_C73-19 | Issue: No communication with sensor! | Time: 14.01.2026 12:16:46
+
+13. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 14.01.2026 12:16:25
+
+
+____________________________________________________________
+PROJECT: Vargön
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: IPI # 2 (15 meter) (129364) | Issue: Data reception | Time: 1/14/2026, 9:15:00 PM
+
+2. Location: IPI # 2 (15 meter) (129364) | Issue: Data reception | Time: 1/14/2026, 6:55:00 PM
+
