@@ -120,6 +120,7 @@
             text-decoration: none;
             transition: all 0.2s;
             font-size: 0.95rem;
+            text-align: left;
         }
 
         .link-button:hover {
@@ -460,10 +461,13 @@
                     </div>
                     <ul class="links-list">
                         <li class="link-item">
-                            <a href="https://geomosnow.leica-geosystems.com/GeoMoSNow/Login.aspx" class="link-button" target="_blank">GeoMoS Now</a>
+                            <a href="https://geomosnow.leica-geosystems.com/GeoMoSNow/Login.aspx" class="link-button" target="_blank">GeoMoS Now!</a>
                         </li>
                         <li class="link-item">
                             <a href="https://login.teamviewer.com/nav/home" class="link-button" target="_blank">GeoMoS Monitor via TeamViewer</a>
+                        </li>
+                        <li class="link-item">
+                            <button class="link-button" onclick="openInfoPanel('GNSS')">Leica GNSS Mottagare</button>
                         </li>
                     </ul>
                 </div>
@@ -617,6 +621,20 @@
             UPK: {
                 title: "UPK - Gateway 32371",
                 content: "eThooze9k"
+            },
+            GNSS: {
+                title: "GNSS Mottagare",
+                content: `
+                        <p><strong>Kustkajen</strong></p>
+                        <p><a href="http://94.234.167.82/index.lsp target="_blank" style="color: #CE0E2D;">GNSS1_(GPS03)</a></p>
+                        <p><a href="http://94.234.167.85/index.lsp target="_blank" style="color: #CE0E2D;">GNSS2_(GPS05)</a></p>
+                        <p><a href="http://94.234.167.86/index.lsp" target="_blank" style="color: #CE0E2D;">GNSS3_(GPS02)</a></p>
+                        <p><a href="http://94.234.167.84/index.lsp" target="_blank" style="color: #CE0E2D;">GNSS4_(GPS04)</a></p>
+                        <p><a href="http://94.234.167.72/index.lsp" target="_blank" style="color: #CE0E2D;">GNSS5_(GPS01)</a></p>
+                        <p><strong>Vilelmina</strong>
+                        <p><a href="http://78.79.221.93/index.lsp" target="_blank" style="color: #CE0E2D;">_(GPS09)</a></p>
+                        </p>
+                        `
             }
         };
 

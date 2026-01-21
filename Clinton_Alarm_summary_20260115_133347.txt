@@ -1,0 +1,152 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-01-15 13:33:47
+Total Projects: 4
+Total Alarms: 60
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Hisingsbron
+Number of alarms: 4
+____________________________________________________________
+
+1. Instrument: STN1 | Site: Hisingsbron | Issue: The communication device is online | Time: 15.01.2026 01:36:17
+
+2. Instrument: STN2 | Site: Hisingsbron | Issue: The communication device is online | Time: 15.01.2026 01:36:18
+
+3. Instrument: STN2 | Site: Hisingsbron | Issue: The communication device is offline | Time: 15.01.2026 01:36:00
+
+4. Instrument: STN1 | Site: Hisingsbron | Issue: The communication device is offline | Time: 15.01.2026 01:36:00
+
+
+____________________________________________________________
+PROJECT: Kustkajen
+Number of alarms: 4
+____________________________________________________________
+
+1. Location: GNSS_Spider | Site: Kustkajen Göteborgs hamn | Issue: Scheduler 'GNSS_Import' has delivered data
+
+2. Location: GNSS_Spider | Site: Kustkajen Göteborgs hamn | Issue: Scheduler 'GNSS_Import' - Watchdog alarm
+
+3. Location: Prism | Site: Kustkajen Göteborgs hamn
+
+4. Location: Leveling | Site: Kustkajen Göteborgs hamn
+
+
+____________________________________________________________
+PROJECT: Svappavaara
+Number of alarms: 1
+____________________________________________________________
+
+1. Sensor: SVV_TM60_1 | Point: SVV_B7 | Issue: No communication with sensor! | Time: 15.01.2026 12:21:13
+
+
+____________________________________________________________
+PROJECT: Södertälje Sluss o Klaffbro
+Number of alarms: 51
+____________________________________________________________
+
+1. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 15 in 60 minutes | Time: 15.01.2026 13:00:06
+
+2. Sensor: SSK_TS03 | Point: SSK_23BY012 | Issue: No communication with sensor! | Time: 15.01.2026 12:19:30
+
+3. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 15.01.2026 12:18:56
+
+4. Sensor: SSK_TS03 | Point: SSK_C73-1 | Issue: No communication with sensor! | Time: 15.01.2026 12:18:22
+
+5. Sensor: SSK_TS03 | Point: SSK_C73-19 | Issue: No communication with sensor! | Time: 15.01.2026 12:18:01
+
+6. Sensor: SSK_TS03 | Point: SSK_C73-18 | Issue: No communication with sensor! | Time: 15.01.2026 12:17:41
+
+7. Sensor: SSK_TS03 | Point: SSK_C73-17_INK | Issue: No communication with sensor! | Time: 15.01.2026 12:17:20
+
+8. Sensor: SSK_TS03 | Point: SSK_C73-16 | Issue: No communication with sensor! | Time: 15.01.2026 12:16:59
+
+9. Sensor: SSK_TS03 | Point: SSK_C73-14 | Issue: No communication with sensor! | Time: 15.01.2026 12:16:38
+
+10. Sensor: SSK_TS03 | Point: SSK_C73-2_INK | Issue: No communication with sensor! | Time: 15.01.2026 12:16:18
+
+11. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 15.01.2026 12:15:57
+
+12. Sensor: SSK_TS03 | Point: SSK_B01_M | Issue: No communication with sensor! | Time: 15.01.2026 12:15:36
+
+13. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: No communication with sensor! | Time: 15.01.2026 12:15:24
+
+14. Sensor: SSK_TS03 | Point: SSK_23BY012 | Issue: No communication with sensor! | Time: 15.01.2026 12:15:19
+
+15. Sensor: SSK_TS03 | Point: SSK_C73-13 | Issue: No communication with sensor! | Time: 15.01.2026 12:15:18
+
+16. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 32 in 60 minutes | Time: 15.01.2026 10:00:06
+
+17. Sensor: SSK_TS03 | Point: SSK_23BY011 | Issue: No communication with sensor! | Time: 15.01.2026 09:18:52
+
+18. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 15.01.2026 09:18:40
+
+19. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 15.01.2026 09:18:27
+
+20. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: No communication with sensor! | Time: 15.01.2026 09:18:15
+
+21. Sensor: SSK_TS03 | Point: SSK_23BY012 | Issue: No communication with sensor! | Time: 15.01.2026 09:18:02
+
+22. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 15.01.2026 09:17:50
+
+23. Sensor: SSK_TS03 | Point: SSK_C14-11 | Issue: No communication with sensor! | Time: 15.01.2026 09:17:37
+
+24. Sensor: SSK_TS03 | Point: SSK_C14-10 | Issue: No communication with sensor! | Time: 15.01.2026 09:17:24
+
+25. Sensor: SSK_TS03 | Point: SSK_C14-9 | Issue: No communication with sensor! | Time: 15.01.2026 09:17:12
+
+26. Sensor: SSK_TS03 | Point: SSK_C14-8_INK | Issue: No communication with sensor! | Time: 15.01.2026 09:16:59
+
+27. Sensor: SSK_TS03 | Point: SSK_C14-7 | Issue: No communication with sensor! | Time: 15.01.2026 09:16:47
+
+28. Sensor: SSK_TS03 | Point: SSK_C14-6 | Issue: No communication with sensor! | Time: 15.01.2026 09:16:34
+
+29. Sensor: SSK_TS03 | Point: SSK_C14-5 | Issue: No communication with sensor! | Time: 15.01.2026 09:16:22
+
+30. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 15.01.2026 09:16:09
+
+31. Sensor: SSK_TS03 | Point: SSK_B01_M | Issue: No communication with sensor! | Time: 15.01.2026 09:15:57
+
+32. Sensor: SSK_TS03 | Point: SSK_23BY002 | Issue: No communication with sensor! | Time: 15.01.2026 09:15:44
+
+33. Sensor: SSK_TS03 | Point: SSK_23BY012 | Issue: No communication with sensor! | Time: 15.01.2026 09:15:32
+
+34. Sensor: SSK_TS03 | Point: SSK_23BY009 | Issue: No communication with sensor! | Time: 15.01.2026 09:15:19
+
+35. Sensor: SSK_TS03 | Point: SSK_C14-4 | Issue: No communication with sensor! | Time: 15.01.2026 09:15:06
+
+36. Sensor: SSK_TS03 | Point: SSK_C14-12 | Issue: No communication with sensor! | Time: 15.01.2026 09:14:54
+
+37. Sensor: SSK_TS03 | Point: SSK_C14-3_INK | Issue: No communication with sensor! | Time: 15.01.2026 09:14:41
+
+38. Sensor: SSK_TS03 | Point: SSK_C14-13_INK | Issue: No communication with sensor! | Time: 15.01.2026 09:14:29
+
+39. Sensor: SSK_TS03 | Point: SSK_C14-2 | Issue: No communication with sensor! | Time: 15.01.2026 09:14:16
+
+40. Sensor: SSK_TS03 | Point: SSK_C14-14 | Issue: No communication with sensor! | Time: 15.01.2026 09:14:04
+
+41. Sensor: SSK_TS03 | Point: SSK_C14-1 | Issue: No communication with sensor! | Time: 15.01.2026 09:13:51
+
+42. Sensor: SSK_TS03 | Point: SSK_C14-17 | Issue: No communication with sensor! | Time: 15.01.2026 09:13:39
+
+43. Sensor: SSK_TS03 | Point: SSK_C14-18 | Issue: No communication with sensor! | Time: 15.01.2026 09:13:26
+
+44. Sensor: SSK_TS03 | Point: SSK_C14-16_INK | Issue: No communication with sensor! | Time: 15.01.2026 09:13:14
+
+45. Sensor: SSK_TS03 | Point: SSK_C14-15 | Issue: No communication with sensor! | Time: 15.01.2026 09:13:01
+
+46. Sensor: SSK_TS03 | Point: SSK_C14-14a | Issue: No communication with sensor! | Time: 15.01.2026 09:12:48
+
+47. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 15.01.2026 09:12:06
+
+48. Sensor: SSK_TS03 | Point: SSK_B01_M | Issue: No communication with sensor! | Time: 15.01.2026 09:11:45
+
+49. Sensor: SSK_TS03 | Point: SSK_B01 | Issue: No communication with sensor! | Time: 15.01.2026 07:16:56
+
+50. Sensor: SSK_TS03 | Point: SSK_23BY010 | Issue: No communication with sensor! | Time: 15.01.2026 07:16:25
+
+51. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 9 in 60 minutes | Time: 15.01.2026 06:00:05
+

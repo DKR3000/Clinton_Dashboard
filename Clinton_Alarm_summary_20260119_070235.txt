@@ -1,0 +1,72 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-01-19 07:02:35
+Total Projects: 5
+Total Alarms: 17
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Arenastaden
+Number of alarms: 1
+____________________________________________________________
+
+1. Locations: DIN_1B604 s000 - Last sample was from 6 hours ago., DIN_1B604 s001 - Last sample was from 6 hours ago., DIN_1B604 s002 - Last sample was from 6 hours ago., DIN_1B604 s003 - Last sample was from 6 hours ago., DIN_1B604 s004 - Last sample was from 6 hours ago., DIN_1B604 s005 - Last sample was from 6 hours ago., DIN_1B604 s006 - Last sample was from 6 hours ago., DIN_1B604 s007 - Last sample was from 6 hours ago., DIN_1B604 s008 - Last sample was from 6 hours ago., DIN_1B604 s009 - Last sample was from 6 hours ago., DIN_1B604 s010 - Last sample was from 6 hours ago. | Issue: Missing Node DIN > 6h (Email) | Time: 18/01/2026 10:01:50
+
+
+____________________________________________________________
+PROJECT: Ballsered
+Number of alarms: 1
+____________________________________________________________
+
+1. Locations: IPI 2 (25 meter) (130143), IPI 1 (25 meter) (130414) | Issue: Data reception | Time: 1/18/2026, 11:40:00 AM
+
+
+____________________________________________________________
+PROJECT: Hisingsbron
+Number of alarms: 2
+____________________________________________________________
+
+1. Sensor: STN2 | Issue: Not enough measurements for reference group calculation. 2/3 | Time: 19.01.2026 04:02:32
+
+2. Sensor: STN2 | Issue: Not enough measurements for reference group calculation. 2/3 | Time: 18.01.2026 08:05:16
+
+
+____________________________________________________________
+PROJECT: Södertälje Sluss o Klaffbro
+Number of alarms: 5
+____________________________________________________________
+
+1. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 14 in 60 minutes | Time: 19.01.2026 06:00:04
+
+2. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 13 in 60 minutes | Time: 18.01.2026 14:00:02
+
+3. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 12 in 60 minutes | Time: 18.01.2026 13:00:02
+
+4. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 6 in 60 minutes | Time: 18.01.2026 10:00:02
+
+5. Sensor: SSK_TS03 | Point: SSK_TS01 | Issue: Communication problem! SSK_TS03 [TM60 I 0.5 R1000]: 9 in 60 minutes | Time: 18.01.2026 09:00:02
+
+
+____________________________________________________________
+PROJECT: UPK Uppsala
+Number of alarms: 8
+____________________________________________________________
+
+1. [WDChain] Uppsala UPK
+
+2. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' has delivered data
+
+3. [WDChain] Uppsala UPK | Issue: Watchdog alarm
+
+4. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' - Watchdog alarm
+
+5. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' has delivered data
+
+6. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' - Watchdog alarm
+
+7. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' has delivered data
+
+8. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' - Watchdog alarm
+
