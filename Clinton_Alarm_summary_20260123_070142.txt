@@ -1,0 +1,50 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-01-23 07:01:42
+Total Projects: 3
+Total Alarms: 12
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Halltippen
+Number of alarms: 1
+____________________________________________________________
+
+1. Location: Cant-FM3NT-50_01A9F4 | Issue: Data reception | Time: 1/22/2026, 12:40:00 PM
+
+
+____________________________________________________________
+PROJECT: Lerum Vändspår
+Number of alarms: 1
+____________________________________________________________
+
+1. Location: 437+860_Ny | Issue: Data reception | Time: 1/22/2026, 1:00:00 PM
+
+
+____________________________________________________________
+PROJECT: UPK Uppsala
+Number of alarms: 10
+____________________________________________________________
+
+1. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI3+4' has delivered data
+
+2. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI3+4' - Watchdog alarm
+
+3. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI3+4' has delivered data
+
+4. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI3+4' - Watchdog alarm
+
+5. Location: Inc | Site: Uppsala UPK
+
+6. [WDChain] Uppsala UPK
+
+7. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI3+4' has delivered data
+
+8. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI3+4' - Watchdog alarm
+
+9. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' has delivered data
+
+10. Location: Inc | Site: Uppsala UPK | Issue: Scheduler 'Import St_Olofg_IPI2' - Watchdog alarm
+

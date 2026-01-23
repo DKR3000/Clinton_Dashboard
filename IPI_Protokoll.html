@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPI Installationsprotokoll - Clinton</title>
+    <link rel="stylesheet" type="text/css" href="reset.css" />
+    <link rel="stylesheet" type="text/css" href="Style_0.7.css" />
+    <Style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #616060 0%, #a0a0a0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff0000, #db3434);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #ff0000, #db3434);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .photo-upload {
+            border: 3px dashed #bdc3c7;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            background: rgba(236, 240, 241, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .photo-upload:hover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .photo-upload.dragover {
+            border-color: #27ae60;
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .photo-previews {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .photo-preview {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .remove-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-send:hover {
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #ff0000, #ff0000);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.514);
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 10px 25px rgb(255, 0, 0);
+        }
+
+        .format-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .format-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .format-modal h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .format-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .format-option {
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .format-option:hover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .format-option.txt {
+            border-color: #95a5a6;
+        }
+
+        .format-option.txt:hover {
+            border-color: #7f8c8d;
+            background: rgba(127, 140, 141, 0.1);
+        }
+
+        .format-option.pdf {
+            border-color: #e74c3c;
+        }
+
+        .format-option.pdf:hover {
+            border-color: #c0392b;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .format-option.jpg {
+            border-color: #f39c12;
+        }
+
+        .format-option.jpg:hover {
+            border-color: #e67e22;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .modal-btn.cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #7f8c8d;
+        }
+
+        .sensor-grid-wrapper {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+
+        .sensor-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .sensor-grid th {
+            background: red;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sensor-grid th:last-child {
+            border-right: none;
+        }
+
+        .sensor-grid td {
+            padding: 8px;
+            border-bottom: 1px solid #e1e8ed;
+            border-right: 1px solid #e1e8ed;
+        }
+
+        .sensor-grid td:last-child {
+            border-right: none;
+        }
+
+        .sensor-grid tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .sensor-grid tbody tr:hover {
+            background-color: rgb(243, 238, 238);
+        }
+
+        .sensor-grid input {
+            width: 100%;
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: border-color 0.3s ease;
+        }
+
+        .sensor-grid input:focus {
+            outline: none;
+            border-color: #ffffff;
+            box-shadow: 0 0 5px rgba(235, 3, 3, 0.3);
+        }
+        .summary {
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .summary h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .summary-item {
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            display: inline-block;
+            width: 150px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .photo-previews {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>IPI Installation Logger</h1>
+            <p>Clinton Mätkonsult AB</p>
+        </div>
+
+        <div class="form-container">
+            <form id="installationForm">
+                <div class="form-group">
+                    <label for="projectTitle">Project Name/Site</label>
+                    <input type="text" id="projectTitle" name="projectTitle" required placeholder="Enter project name or site...">
+                </div>
+
+                <div class="form-group">
+                    <label for="installationNumber">Installation name</label>
+                    <input type="text" id="installationNumber" name="installationNumber" required placeholder="Enter installation name eg IPI101...">
+                </div>
+
+                <div class="form-group">
+                    <label for="installationDate">Installation Date</label>
+                    <input type="date" id="installationDate" name="installationDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gateway">Gateway</label>
+                    <input type="text" id="gateway" name="gateway" required placeholder="Enter gateway id">
+                </div>
+
+                <div class="form-group">
+                    <label for="node">Node</label>
+                    <input type="text" id="node" name="node" required placeholder="Enter node id">
+                </div>
+
+                <div class="form-group">
+                    <label for="sensorCount">Number of Sensors</label>
+                    <input type="number" id="sensorCount" name="sensorCount" min="0" max="50" placeholder="Enter number of sensors..." onchange="updateSensorGrid()">
+                    <div style="margin-top: 5px; font-size: 0.9rem; color: #7f8c8d;">
+                        Enter the number of sensors to generate the sensor details table
+                    </div>
+                </div>
+                
+                
+                <div id="sensorGridContainer"> 
+                    <label>Sensor Details</label>
+                    <div class="sensor-grid-wrapper">
+                        <table class="sensor-grid" id="sensorGrid">
+                            <thead>
+                                <tr>
+                                    <th>Sensor Nr</th>
+                                    <th>Djup/Depth</th>
+                                    <th>Serienummer</th>
+                                    <th>Modbus</th>
+                                    <th>Anmärkning</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sensorGridBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Installation Location</label>
+                    <div id="map" style="height: 300px; border-radius: 10px; overflow: hidden; border: 2px solid #e1e8ed;"></div>
+                    <div style="margin-top: 10px; font-size: 0.9rem; color: #7f8c8d;">
+                        <span id="locationStatus">Click on the map to pin the installation location</span>
+                    </div>
+                    <div id="locationInfo" style="margin-top: 10px; padding: 10px; background: rgba(46, 204, 113, 0.1); border-radius: 8px; display: none;">
+                        <strong>📍 Location Set:</strong> <span id="coordinates"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Photos</label>
+                    <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
+                        <input type="file" id="photoInput" multiple accept="image/*">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">Click to upload photos or drag and drop</div>
+                        <div style="font-size: 0.9rem; color: #95a5a6;">Supports multiple images</div>
+                    </div>
+                    <div class="photo-previews" id="photoPreviews"></div>
+                </div>
+
+                <div class="summary" id="summary" style="display: none;">
+                    <h3>Installation Summary</h3>
+                    <div class="summary-item">
+                        <span class="summary-label">Project:</span>
+                        <span id="summaryProject">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Installation #:</span>
+                        <span id="summaryNumber">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label"># Sensors:</span>
+                        <span id="summarysensors">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Date:</span>
+                        <span id="summaryDate">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Location:</span>
+                        <span id="summaryLocation">Not set</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Photos:</span>
+                        <span id="summaryPhotos">0</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button type="button" class="btn btn-send" onclick="sendEmail()" style="flex: 1; margin-top: 0;">
+                        📧 Send Installation Report
+                    </button>
+                    <button type="button" class="btn btn-save" onclick="saveReport()" style="flex: 1; margin-top: 0;">
+                        💾 Save Installation Report
+                    </button>
+                </div>
+            </form>
+        </div>
+        <footer class="footer">
+            <p >© 2025 Clinton Mätkonsult</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script>
+        let uploadedFiles = [];
+        let map;
+        let marker;
+        let selectedLocation = null;
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+
+        function initMap() {
+            // Initialize map centered on Stockholm (user's location)
+            map = L.map('map').setView([59.3293, 18.0686], 10);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Try to get user's current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        map.setView([lat, lng], 13);
+                    },
+                    function(error) {
+                        console.log('Geolocation error:', error);
+                        // Keep default Stockholm location
+                    }
+                );
+            }
+
+            // Add click event to map
+            map.on('click', function(e) {
+                setLocation(e.latlng.lat, e.latlng.lng);
+            });
+        }
+        function setLocation(lat, lng) {
+            // Remove existing marker
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Add new marker
+            marker = L.marker([lat, lng]).addTo(map);
+            
+            // Store location
+            selectedLocation = { lat: lat, lng: lng };
+            
+            // Update UI
+            document.getElementById('coordinates').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            document.getElementById('locationInfo').style.display = 'block';
+            document.getElementById('locationStatus').textContent = 'Location pinned successfully!';
+            document.getElementById('locationStatus').style.color = '#27ae60';
+            
+            updateSummary();
+        }
+                function updateSensorGrid() {
+            const sensorCount = parseInt(document.getElementById('sensorCount').value) || 0;
+            const container = document.getElementById('sensorGridContainer');
+            const tbody = document.getElementById('sensorGridBody');
+
+            if (sensorCount > 0) {
+                container.style.display = 'block';
+                tbody.innerHTML = '';
+
+                for (let i = 1; i <= sensorCount; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="sensor-nr">${i}</td>
+                        <td><input type="text" class="depth-input" placeholder="Depth" onchange="updateSummary()"></td>
+                        <td><input type="text" class="serial-input" placeholder="Serial number" onchange="updateSummary()"></td>
+                        <td><input type="text" class="modbus-input" placeholder="Modbus" onchange="updateSummary()"></td>
+                        <td><input type="text" class="remarks-input" placeholder="Remarks" onchange="updateSummary()"></td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            } else {
+                container.style.display = 'none';
+                tbody.innerHTML = '';
+            }
+            
+            updateSummary();
+        }
+
+        function getSensorData() {
+            const sensorData = [];
+            const rows = document.querySelectorAll('#sensorGridBody tr');
+            
+            rows.forEach((row, index) => {
+                const inputs = row.querySelectorAll('input');
+                const sensor = {
+                    number: index + 1,
+                    depth: inputs[0].value,
+                    serial: inputs[1].value,
+                    modbus: inputs[2].value,
+                    remarks: inputs[3].value
+                };
+                
+                // Only include sensors that have at least one field filled
+                if (sensor.depth || sensor.serial || sensor.modbus || sensor.remarks) {
+                    sensorData.push(sensor);
+                }
+            });
+            
+            return sensorData;
+        }
+
+        // Set today's date as default
+        document.getElementById('installationDate').valueAsDate = new Date();
+
+        // Photo upload handling
+        const photoInput = document.getElementById('photoInput');
+        const photoUpload = document.querySelector('.photo-upload');
+        const photoPreviews = document.getElementById('photoPreviews');
+
+        photoInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop functionality
+        photoUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            photoUpload.classList.add('dragover');
+        });
+
+        photoUpload.addEventListener('dragleave', () => {
+            photoUpload.classList.remove('dragover');
+        });
+
+        photoUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            photoUpload.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            addFiles(files);
+        });
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    uploadedFiles.push(file);
+                    createPhotoPreview(file);
+                }
+            });
+            updateSummary();
+        }
+
+        function createPhotoPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'photo-preview';
+                photoDiv.innerHTML = `
+                    <img src="${e.target.result}" alt="Photo preview">
+                    <button class="remove-photo" onclick="removePhoto(this, '${file.name}')" title="Remove photo">×</button>
+                `;
+                photoPreviews.appendChild(photoDiv);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto(button, fileName) {
+            const photoDiv = button.parentElement;
+            photoDiv.remove();
+            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+            updateSummary();
+        }
+
+        // Real-time summary updates
+        document.getElementById('projectTitle').addEventListener('input', updateSummary);
+        document.getElementById('installationNumber').addEventListener('input', updateSummary);
+        document.getElementById('sensorCount').addEventListener('input', updateSummary);
+        document.getElementById('installationDate').addEventListener('change', updateSummary);
+
+        function updateSummary() {
+            const projectTitle = document.getElementById('projectTitle').value;
+            const installationNumber = document.getElementById('installationNumber').value;
+            const sensorCount = parseInt(document.getElementById('sensorCount').value) || 0;
+            const installationDate = document.getElementById('installationDate').value;
+
+            document.getElementById('summaryProject').textContent = projectTitle || '-';
+            document.getElementById('summaryNumber').textContent = installationNumber || '-';
+            document.getElementById('summarysensors').textContent = Numberofsensors || '-';
+            document.getElementById('summaryDate').textContent = installationDate || '-';
+            document.getElementById('summaryPhotos').textContent = uploadedFiles.length;
+            
+            // Update location summary
+            if (selectedLocation) {
+                document.getElementById('summaryLocation').textContent = `${selectedLocation.lat.toFixed(4)}, ${selectedLocation.lng.toFixed(4)}`;
+            } else {
+                document.getElementById('summaryLocation').textContent = 'Not set';
+            }
+
+            // Show summary if any field has content
+            const summary = document.getElementById('summary');
+            if (projectTitle || installationNumber || installationDate || uploadedFiles.length > 0 || selectedLocation) {
+                summary.style.display = 'block';
+            } else {
+                summary.style.display = 'none';
+            }
+        }
+
+        function saveReport() {
+            const projectTitle = document.getElementById('projectTitle').value;
+            const installationNumber = document.getElementById('installationNumber').value;
+            const installationDate = document.getElementById('installationDate').value;
+            const sensorData = getSensorData();
+
+            if (!projectTitle || !installationNumber || !installationDate) {
+                alert('Please fill in all required fields (Project Title, Installation Number, and Date).');
+                return;
+            }
+
+            // Show format selection modal
+            showFormatModal();
+        }
+
+        function showFormatModal() {
+            const modal = document.createElement('div');
+            modal.className = 'format-modal';
+            modal.innerHTML = `
+                <div class="format-modal-content">
+                    <h3>Choose Report Format</h3>
+                    <p style="color: #7f8c8d; margin-bottom: 20px;">Select the format for your installation report:</p>
+                    <div class="format-options">
+                        <div class="format-option txt" onclick="downloadReport('txt')">
+                            📄<br>TXT
+                        </div>
+                        <div class="format-option pdf" onclick="downloadReport('pdf')">
+                            📕<br>PDF
+                        </div>
+                        <div class="format-option jpg" onclick="downloadReport('jpg')">
+                            🖼️<br>JPG
+                        </div>
+                    </div>
+                    <div class="modal-buttons">
+                        <button class="modal-btn cancel" onclick="closeFormatModal()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeFormatModal();
+                }
+            });
+        }
+
+        function closeFormatModal() {
+            const modal = document.querySelector('.format-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function downloadReport(format) {
+            closeFormatModal();
+            
+            const projectTitle = document.getElementById('projectTitle').value;
+            const installationNumber = document.getElementById('installationNumber').value;
+            const installationDate = document.getElementById('installationDate').value;
+
+            // Create filename
+            const dateStr = installationDate.replace(/-/g, '');
+            const baseFilename = `Installation_${projectTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${installationNumber.replace(/[^a-zA-Z0-9]/g, '_')}_${dateStr}`;
+
+            if (format === 'txt') {
+                downloadTxtReport(baseFilename);
+            } else if (format === 'pdf') {
+                downloadPdfReport(baseFilename);
+            } else if (format === 'jpg') {
+                downloadJpgReport(baseFilename);
+            }
+        }
+
+        function downloadTxtReport(filename) {
+            const projectTitle = document.getElementById('projectTitle').value;
+            const installationNumber = document.getElementById('installationNumber').value;
+            const installationDate = document.getElementById('installationDate').value;
+            const sensorData = getSensorData();
+
+            // Format the date nicely
+            const dateObj = new Date(installationDate);
+            const formattedDate = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Create report content
+            let reportContent = `INSTALLATION REPORT
+${'='.repeat(50)}
+
+Project Title: ${projectTitle}
+Installation Number: ${installationNumber}
+Installation Date: ${formattedDate}
+`;
+
+            // Add sensor data to email if available
+            if (sensorData.length > 0) {
+                body += `
+Sensors Installed: ${sensorData.length}
+
+SENSOR DETAILS:`;
+                sensorData.forEach(sensor => {
+                    body += `
+Sensor ${sensor.number}:
+  - Depth: ${sensor.depth || 'Not specified'}
+  - Serial: ${sensor.serial || 'Not specified'}
+  - Modbus: ${sensor.modbus || 'Not specified'}
+  - Remarks: ${sensor.remarks || 'None'}`;
+                });
+            } else {
+                body += `
+Sensors: No sensor data recorded`;
+            }
+            if (selectedLocation) {
+                reportContent += `
+Location Coordinates: ${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}
+Map Link: https://www.openstreetmap.org/?mlat=${selectedLocation.lat}&mlon=${selectedLocation.lng}&zoom=16
+`;
+            } else {
+                reportContent += `
+Location: Not specified
+`;
+            }
+
+            // Add sensor data
+            if (sensorData.length > 0) {
+                reportContent += `
+SENSOR DETAILS
+${'='.repeat(30)}
+`;
+                sensorData.forEach(sensor => {
+                    reportContent += `
+Sensor ${sensor.number}:
+  Depth: ${sensor.depth || 'Not specified'}
+  Serial Number: ${sensor.serial || 'Not specified'}
+  Modbus: ${sensor.modbus || 'Not specified'}
+  Remarks: ${sensor.remarks || 'None'}
+`;
+                });
+            } else {
+                reportContent += `
+Sensors: No sensor data recorded
+`;
+            }
+
+            reportContent += `
+Photos Attached: ${uploadedFiles.length}`;
+
+            // Add photo list if any
+            if (uploadedFiles.length > 0) {
+                reportContent += `
+Photo Files:`;
+                uploadedFiles.forEach((file, index) => {
+                    reportContent += `
+  ${index + 1}. ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                });
+            }
+
+            reportContent += `
+
+Status: Installation completed successfully
+
+${'='.repeat(50)}
+Report generated on: ${new Date().toLocaleString()}
+Generated by: Installation Logger App
+`;
+
+            // Create and download file
+            const blob = new Blob([reportContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            showSaveConfirmation();
+        }
+
+        function downloadPdfReport(filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const projectTitle = document.getElementById('projectTitle').value;
+            const installationNumber = document.getElementById('installationNumber').value;
+            const installationDate = document.getElementById('installationDate').value;
+            const sensorData = getSensorData();
+
+            // Format the date nicely
+            const dateObj = new Date(installationDate);
+            const formattedDate = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Add content to PDF
+            doc.setFontSize(20);
+            doc.text('INSTALLATION REPORT', 20, 30);
+
+            doc.setFontSize(12);
+            let y = 50;
+
+            doc.text(`Project Title: ${projectTitle}`, 20, y);
+            y += 10;
+            doc.text(`Installation Number: ${installationNumber}`, 20, y);
+            y += 10;
+            doc.text(`Installation Date: ${formattedDate}`, 20, y);
+            y += 10;
+
+            if (selectedLocation) {
+                doc.text(`Location: ${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`, 20, y);
+                y += 10;
+            } else {
+                doc.text('Location: Not specified', 20, y);
+                y += 10;
+            }
+
+            // Add sensor data
+            if (sensorData.length > 0) {
+                y += 10;
+                doc.setFontSize(14);
+                doc.text('SENSOR DETAILS', 20, y);
+                doc.setFontSize(12);
+                y += 15;
+
+                sensorData.forEach(sensor => {
+                    if (y > 250) { // Add new page if needed
+                        doc.addPage();
+                        y = 30;
+                    }
+                    doc.text(`Sensor ${sensor.number}:`, 20, y);
+                    y += 8;
+                    doc.text(`  Depth: ${sensor.depth || 'Not specified'}`, 25, y);
+                    y += 8;
+                    doc.text(`  Serial: ${sensor.serial || 'Not specified'}`, 25, y);
+                    y += 8;
+                    doc.text(`  Modbus: ${sensor.modbus || 'Not specified'}`, 25, y);
+                    y += 8;
+                    doc.text(`  Remarks: ${sensor.remarks || 'None'}`, 25, y);
+                    y += 15;
+                });
+            } else {
+                doc.text('Sensors: No sensor data recorded', 20, y);
+                y += 10;
+            }
+
+            doc.text(`Photos Attached: ${uploadedFiles.length}`, 20, y);
+            y += 20;
+
+            if (uploadedFiles.length > 0) {
+                doc.text('Photo Files:', 20, y);
+                y += 10;
+                uploadedFiles.forEach((file, index) => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 30;
+                    }
+                    doc.text(`  ${index + 1}. ${file.name} (${(file.size / 1024).toFixed(1)} KB)`, 20, y);
+                    y += 8;
+                });
+                y += 10;
+            }
+
+            doc.text('Status: Installation completed successfully', 20, y);
+            y += 20;
+
+            doc.setFontSize(10);
+            doc.text(`Report generated on: ${new Date().toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text('Generated by: The Clinton Installation Protocol App', 20, y);
+
+            // Save the PDF
+            doc.save(filename + '.pdf');
+            showSaveConfirmation();
+        }
+
+        function downloadJpgReport(filename) {
+            // Create a visual report element
+            const reportElement = document.createElement('div');
+            reportElement.style.cssText = `
+                width: 800px;
+                padding: 40px;
+                background: white;
+                font-family: Arial, sans-serif;
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            `;
+
+            const projectTitle = document.getElementById('projectTitle').value;
+            const installationNumber = document.getElementById('installationNumber').value;
+            const installationDate = document.getElementById('installationDate').value;
+
+            const dateObj = new Date(installationDate);
+            const formattedDate = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            reportElement.innerHTML = `
+                <div style="text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 20px; margin-bottom: 30px;">
+                    <h1 style="color: #2c3e50; margin: 0; font-size: 32px;">INSTALLATION REPORT</h1>
+                </div>
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+                    <h2 style="color: #3498db; margin: 0 0 15px 0;">Project Details</h2>
+                    <p style="margin: 8px 0; font-size: 16px;"><strong>Project:</strong> ${projectTitle}</p>
+                    <p style="margin: 8px 0; font-size: 16px;"><strong>Installation Number:</strong> ${installationNumber}</p>
+                    <p style="margin: 8px 0; font-size: 16px;"><strong>Date:</strong> ${formattedDate}</p>
+                    <p style="margin: 8px 0; font-size: 16px;"><strong>Location:</strong> ${selectedLocation ? `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}` : 'Not specified'}</p>
+                    <p style="margin: 8px 0; font-size: 16px;"><strong>Photos:</strong> ${uploadedFiles.length} attached</p>
+                </div>
+                <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; border-left: 5px solid #27ae60;">
+                    <p style="margin: 0; font-size: 18px; color: #27ae60; font-weight: bold;">✓ Installation completed successfully</p>
+                </div>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d;">
+                    <p style="margin: 5px 0;">Report generated on: ${new Date().toLocaleString()}</p>
+                    <p style="margin: 5px 0;">Generated by: The Clinton Installation Protocol App</p>
+                </div>
+            `;
+
+            document.body.appendChild(reportElement);
+
+            // Use html2canvas to convert to image
+            html2canvas(reportElement, {
+                backgroundColor: '#ffffff',
+                scale: 2
+            }).then(canvas => {
+                // Create download link
+                const link = document.createElement('a');
+                link.download = filename + '.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+
+                // Clean up
+                document.body.removeChild(reportElement);
+                showSaveConfirmation();
+            });
+        }
+
+        function showSaveConfirmation() {
+            setTimeout(() => {
+                if (confirm('Report saved successfully! Would you like to reset the form for a new installation?')) {
+                    resetForm();
+                }
+            }, 500);
+        }
+
+        function sendEmail() {
+            const projectTitle = document.getElementById('projectTitle').value;
+            const installationNumber = document.getElementById('installationNumber').value;
+            const installationDate = document.getElementById('installationDate').value;
+
+            if (!projectTitle || !installationNumber || !installationDate) {
+                alert('Please fill in all required fields (Project Title, Installation Number, and Date).');
+                return;
+            }
+
+            // Format the date nicely
+            const dateObj = new Date(installationDate);
+            const formattedDate = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Create email content
+            const subject = `Installation Report - ${projectTitle} #${installationNumber}`;
+            let body = `Installation Report
+
+Project: ${projectTitle}
+Installation Number: ${installationNumber}
+Date: ${formattedDate}`;
+
+            // Add location if set
+            if (selectedLocation) {
+                body += `
+Location: ${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}
+Map Link: https://www.openstreetmap.org/?mlat=${selectedLocation.lat}&mlon=${selectedLocation.lng}&zoom=16`;
+            }
+
+            body += `
+Photos Attached: ${uploadedFiles.length}
+
+Installation completed successfully.
+
+---
+Generated by: The Clinton Installation Protocol App`;
+
+            // Create mailto link
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Open email client
+            window.location.href = mailtoLink;
+
+            // Show confirmation
+            setTimeout(() => {
+                if (confirm('Email client opened. Would you like to reset the form for a new installation?')) {
+                    resetForm();
+                }
+            }, 1000);
+        }
+
+        function resetForm() {
+            document.getElementById('installationForm').reset();
+            uploadedFiles = [];
+            selectedLocation = null;
+            photoPreviews.innerHTML = '';
+            document.getElementById('installationDate').valueAsDate = new Date();
+            
+            // Reset sensor grid
+            document.getElementById('sensorCount').value = '';
+            document.getElementById('sensorGridContainer').style.display = 'none';
+            document.getElementById('sensorGridBody').innerHTML = '';
+            
+            // Reset map and location info
+            if (marker) {
+                map.removeLayer(marker);
+                marker = null;
+            }
+            document.getElementById('locationInfo').style.display = 'none';
+            document.getElementById('locationStatus').textContent = 'Click on the map to pin the installation location';
+            document.getElementById('locationStatus').style.color = '#7f8c8d';
+            
+            updateSummary();
+        }
+    </script>
+</body>
+</html>
