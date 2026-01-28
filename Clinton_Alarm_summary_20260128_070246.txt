@@ -1,0 +1,36 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-01-28 07:02:46
+Total Projects: 2
+Total Alarms: 8
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Halltippen
+Number of alarms: 3
+____________________________________________________________
+
+1. Location: Cant-FM3NT-50_01A9F4 | Issue: Data reception | Time: 1/27/2026, 5:10:00 PM
+
+2. Location: Cant-FM3NT-50_01A9F4 | Issue: Data reception | Time: 1/27/2026, 5:10:00 PM
+
+3. Location: Cant-FM3NT-50_01A9F4 | Issue: Data reception | Time: 1/27/2026, 9:10:00 AM
+
+
+____________________________________________________________
+PROJECT: Lerum Vändspår
+Number of alarms: 5
+____________________________________________________________
+
+1. Location: 437+840_Ny | Issue: Data reception | Time: 1/28/2026, 6:45:00 AM
+
+2. Location: 437+880_B | Issue: Data reception | Time: 1/28/2026, 5:45:00 AM
+
+3. Location: 437+880_B | Issue: Data reception | Time: 1/28/2026, 5:45:00 AM
+
+4. Locations: 437+900_Ny, 438+000_Ny, 437+980_Ny, 437+940 | Issue: Data reception | Time: 1/28/2026, 2:15:00 AM
+
+5. Location: 437+960 | Issue: Data reception | Time: 1/28/2026, 1:15:00 AM
+
