@@ -1,0 +1,76 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-02-05 07:26:54
+Total Projects: 6
+Total Alarms: 16
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Ballsered
+Number of alarms: 3
+____________________________________________________________
+
+1. Instrument: IPI 1 (25 meter) | Issue: Stoppvärde | _04_Cumulative Deviation B: 137.53858591800272 | Time: 2/5/2026, 4:00:00 AM
+
+2. Instrument: IPI 1 (25 meter) | Issue: Stoppvärde | _04_Cumulative Deviation B: 71.84748127458008 | Time: 2/5/2026, 2:30:00 AM
+
+3. Instrument: IPI 1 (25 meter) | Issue: Stoppvärde | _04_Cumulative Deviation B: 71.85618878816062 | Time: 2/5/2026, 12:30:00 AM
+
+
+____________________________________________________________
+PROJECT: Hammargårds ARV
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: KP_Byggnader_C01 | Site: Hammargårds ARV
+
+2. Location: KP_C01 | Site: Hammargårds ARV
+
+
+____________________________________________________________
+PROJECT: Hisingsbron
+Number of alarms: 2
+____________________________________________________________
+
+1. Instrument: STN2 | Site: Hisingsbron | Issue: The communication device is offline | Time: 04.02.2026 09:51:18
+
+2. Instrument: STN1 | Site: Hisingsbron | Issue: The communication device is offline | Time: 04.02.2026 09:51:18
+
+
+____________________________________________________________
+PROJECT: Lerum Vändspår
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: 437+880_B | Issue: Data reception | Time: 2/5/2026, 7:00:00 AM
+
+2. Locations: 437+840_Ny, 437+820_Ny | Issue: Data reception | Time: 2/5/2026, 3:30:00 AM
+
+
+____________________________________________________________
+PROJECT: Lärjeån
+Number of alarms: 6
+____________________________________________________________
+
+1. [WDChain] Lärjeån monitorering | Issue: Watchdog alarm
+
+2. Location: Inc | Site: Lärjeån monitorering | Issue: Scheduler 'IPI North 130295' - Watchdog alarm
+
+3. Location: Inc | Site: Lärjeån monitorering | Issue: Scheduler 'IPI South 130112' - Watchdog alarm
+
+4. Location: Inc | Site: Lärjeån monitorering | Issue: Scheduler 'IPI South 130112' has delivered data
+
+5. [WDChain] Lärjeån monitorering
+
+6. Location: Inc | Site: Lärjeån monitorering | Issue: Scheduler 'IPI North 130295' has delivered data
+
+
+____________________________________________________________
+PROJECT: Vargön
+Number of alarms: 1
+____________________________________________________________
+
+1. Location: Inc | Site: Skredsäkring Vargön | Issue: 50 sensors failed to deliver data in time
+

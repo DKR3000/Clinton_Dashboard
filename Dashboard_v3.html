@@ -53,6 +53,20 @@
             font-size: 1rem;
         }
 
+         .map-card {
+            background: white; 
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 2rem;
+        }
+
+        .map-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
         .platforms-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -569,6 +583,12 @@
                                 <button class="info-btn" onclick="openInfoPanel('Bokenas')">Info</button>
                             </div>
                         </li>
+                        <li class="link-item">
+                            <div class="link-with-info">
+                                <a href="https://loadsensing.wocs3.com/32501" class="link-button" target="_blank">Ostkustbanan Sundsvall - Gateway 32501</a>
+                                <button class="info-btn" onclick="openInfoPanel('Ostkustbanan')">Info</button>
+                            </div>
+                        </li>
                     </ul>
                 </div>     
                 <div class="platform-card">
@@ -585,9 +605,49 @@
                         </li>
                     </ul>
                 </div>
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">#</div>
+                        <h2 class="platform-name">Installationsprotokoll</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <a href="Tryckgivare" class="link-button" target="_blank">Tryckgivare</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="IPI_Protokoll.html" class="link-button" target="_blank">IPI Protokoll</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <div class="platform-icon">#</div>
+                        <h2 class="platform-name">Installationsprotokoll</h2>
+                    </div>
+                    <ul class="links-list">
+                        <li class="link-item">
+                            <a href="Tryckgivare" class="link-button" target="_blank">Tryckgivare</a>
+                        </li>
+                        <li class="link-item">
+                            <a href="IPI_Protokoll.html" class="link-button" target="_blank">IPI Protokoll</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                </div>
             </div>
         </div>
-
+        <!--Map Card-->
+        <div class="map-card">
+            <div class="platform-header">
+                <div class="platform-icon"></div>
+                    <h2 class="platform-name">Map of projects</h2>
+            </div>
+                <div id="map" style="height: 750px; width: auto; border-radius: 10px; overflow: hidden; border: 2px solid #e1e8ed;"></div>
+                <div style="margin-top: 10px; font-size: 0.9rem; color: #7f8c8d;">
+                    <span id="locationStatus">Click on the map to pin the installation location</span>
+            </div>
+        </div>
         <!-- Alerts Sidebar -->
         <div class="alerts-sidebar">
             <div class="alerts-header">
@@ -621,7 +681,12 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script>
+    
         // ADD THIS CODE AT THE VERY TOP OF YOUR DASHBOARD'S <script> SECTION
         // This protects your dashboard and redirects unauthorized users to login
 
@@ -647,6 +712,67 @@
             window.location.href = 'login.html';
         }
         }
+let uploadedFiles = [];
+        let map;
+        let marker;
+        let selectedLocation = null;
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+
+        function initMap() {
+            // Initialize map centered on Sweden (user's location)
+            map = L.map('map').setView([62.25, 15.16], 5);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Try to get user's current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        map.setView([lat, lng], 13);
+                    },
+                    function(error) {
+                        console.log('Geolocation error:', error);
+                        // Keep default Stockholm location
+                    }
+                );
+            }
+
+            // Add click event to map
+            map.on('click', function(e) {
+                setLocation(e.latlng.lat, e.latlng.lng);
+            });
+        }
+        function setLocation(lat, lng) {
+            // Remove existing marker
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Add new marker
+            marker = L.marker([lat, lng]).addTo(map);
+            
+            // Store location
+            selectedLocation = { lat: lat, lng: lng };
+            
+            // Update UI
+            document.getElementById('coordinates').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            document.getElementById('locationInfo').style.display = 'block';
+            document.getElementById('locationStatus').textContent = 'Location pinned successfully!';
+            document.getElementById('locationStatus').style.color = '#27ae60';
+            
+            updateSummary();
+        }
+
+        
         // Info panel data - add your project details here later
         const projectInfo = {
             ballsered: {
@@ -672,6 +798,10 @@
             Bokenas: {
                 title: "Bokenäs - Gateway 26627",
                 content: "esah4yeiL"
+            },
+            Ostkustbanan: {
+                title: "Ostkustbanan Sundsvall - Gateway 32501",
+                content: "eThe4saiCi"
             },
             GNSS: {
                 title: "GNSS Mottagare",

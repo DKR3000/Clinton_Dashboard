@@ -1,0 +1,54 @@
+CLINTON ALARM SUMMARY REPORT
+============================================================
+Generated: 2026-02-06 07:04:41
+Total Projects: 5
+Total Alarms: 8
+Time Period: Last 24 hours
+============================================================
+
+
+____________________________________________________________
+PROJECT: Ballsered
+Number of alarms: 1
+____________________________________________________________
+
+1. Instrument: IPI 1 (25 meter) | Issue: Stoppvärde | _04_Cumulative Deviation B: 72.0094884164119 | Time: 2/5/2026, 6:30:00 AM
+
+
+____________________________________________________________
+PROJECT: Halltippen
+Number of alarms: 3
+____________________________________________________________
+
+1. Location: Cant-FM3NT-50_01A9F4 | Issue: Data reception | Time: 2/5/2026, 11:10:00 AM
+
+2. Instrument: Cant-N24 | Issue: Varselgräns | Rälsförhöjning: -7.060979244908664 | Time: 2/5/2026, 9:11:51 AM
+
+3. Instrument: Cant-N15 | Issue: Varselgräns | Rälsförhöjning: -7.17777976154909 | Time: 2/5/2026, 9:10:39 AM
+
+
+____________________________________________________________
+PROJECT: Hammargårds ARV
+Number of alarms: 1
+____________________________________________________________
+
+1. Location: KP_Byggnader_C01 | Site: Hammargårds ARV | Issue: 19 sensors failed to deliver data in time
+
+
+____________________________________________________________
+PROJECT: Lärjeån
+Number of alarms: 1
+____________________________________________________________
+
+1. Location: Inc | Site: Lärjeån monitorering | Issue: 38 sensors failed to deliver data in time
+
+
+____________________________________________________________
+PROJECT: Vargön
+Number of alarms: 2
+____________________________________________________________
+
+1. Location: Inc | Site: Skredsäkring Vargön | Issue: 22 sensors failed to deliver data in time
+
+2. Location: Inc | Site: Skredsäkring Vargön | Issue: 70 sensors failed to deliver data in time
+
