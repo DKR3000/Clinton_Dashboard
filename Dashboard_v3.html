@@ -608,28 +608,28 @@
                 <div class="platform-card">
                     <div class="platform-header">
                         <div class="platform-icon">#</div>
-                        <h2 class="platform-name">Installationsprotokoll</h2>
+                        <h2 class="platform-name">TBA</h2>
                     </div>
                     <ul class="links-list">
                         <li class="link-item">
-                            <a href="Tryckgivare" class="link-button" target="_blank">Tryckgivare</a>
+                            <a href="Tryckgivare" class="link-button" target="_blank">Placeholder</a>
                         </li>
                         <li class="link-item">
-                            <a href="IPI_Protokoll.html" class="link-button" target="_blank">IPI Protokoll</a>
+                            <a href="IPI_Protokoll.html" class="link-button" target="_blank">Placeholder</a>
                         </li>
                     </ul>
                 </div>
                 <div class="platform-card">
                     <div class="platform-header">
                         <div class="platform-icon">#</div>
-                        <h2 class="platform-name">Installationsprotokoll</h2>
+                        <h2 class="platform-name">TBA</h2>
                     </div>
                     <ul class="links-list">
                         <li class="link-item">
-                            <a href="Tryckgivare" class="link-button" target="_blank">Tryckgivare</a>
+                            <a href="Tryckgivare" class="link-button" target="_blank">TBA</a>
                         </li>
                         <li class="link-item">
-                            <a href="IPI_Protokoll.html" class="link-button" target="_blank">IPI Protokoll</a>
+                            <a href="IPI_Protokoll.html" class="link-button" target="_blank">IPI TBA</a>
                         </li>
                     </ul>
                 </div>
@@ -745,6 +745,17 @@ let uploadedFiles = [];
                     }
                 );
             }
+
+            // Fetch the locations
+            fetch('locations.json')
+                .then(response => response.json())
+                .then(locations => {
+                    locations.forEach(location => {
+                        L.marker([location.lat, location.lng])
+                        .addTo(map)
+                        .bindPopup(location.name);
+                    });
+            });
 
             // Add click event to map
             map.on('click', function(e) {
