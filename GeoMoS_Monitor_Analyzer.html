@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoMoS Monitor Analyzer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red: #CE0E2D;
+    --red-dark: #a00b22;
+    --red-light: #fdf0f2;
+    --warn-bg: #fff8e1;
+    --warn-border: #f9a825;
+    --warn-text: #9a6200;
+    --green: #2e7d32;
+    --gray-100: #f5f5f5;
+    --gray-200: #e8e8e8;
+    --gray-400: #9a9a9a;
+    --gray-600: #555;
+    --gray-900: #1a1a1a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); background: #fff; color: var(--gray-900); min-height: 100vh; }
+
+  header {
+    border-bottom: 3px solid var(--red);
+    padding: 18px 32px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; background: var(--red);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-mark svg { width: 22px; height: 22px; }
+  header h1 { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  header h1 span { font-size: 0.78rem; font-weight: 300; color: var(--gray-400); letter-spacing: 0.02em; margin-left: 2px; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  #drop-zone {
+    border: 2px dashed var(--gray-200); border-radius: 2px;
+    padding: 48px 24px; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s; position: relative;
+  }
+  #drop-zone:hover, #drop-zone.drag-over { border-color: var(--red); background: var(--red-light); }
+  #drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { font-size: 2.2rem; margin-bottom: 12px; color: var(--gray-400); }
+  #drop-zone p { font-size: 0.9rem; color: var(--gray-600); }
+  #drop-zone strong { color: var(--red); font-weight: 600; }
+  #file-name { margin-top: 8px; font-family: var(--mono); font-size: 0.78rem; color: var(--gray-400); }
+
+  .section-title {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--gray-400);
+    margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200);
+  }
+
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 12px; margin-bottom: 4px;
+  }
+  .summary-card { border: 1px solid var(--gray-200); padding: 16px 18px; border-radius: 2px; }
+  .summary-card .lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 6px; }
+  .summary-card .val { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; }
+  .summary-card .val.red  { color: var(--red); }
+  .summary-card .val.warn { color: var(--warn-text); }
+  .summary-card .sub { font-size: 0.72rem; color: var(--gray-400); margin-top: 3px; }
+
+  .time-note { font-size: 0.72rem; font-family: var(--mono); color: var(--gray-400); margin-top: 6px; }
+
+  .legend { display: flex; gap: 20px; font-size: 0.72rem; color: var(--gray-600); margin-top: 10px; flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .ldot { width: 10px; height: 10px; border-radius: 1px; flex-shrink: 0; }
+
+  .station-block { border: 1px solid var(--gray-200); border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+  .station-header {
+    background: var(--gray-100); border-bottom: 2px solid var(--red);
+    padding: 12px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .sname { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; flex: 1; }
+  .smeta { font-size: 0.72rem; color: var(--gray-400); font-family: var(--mono); }
+  .smeta span { margin-left: 14px; }
+  .badge { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
+  .badge.ok  { background: var(--red); color: white; }
+  .badge.low { background: var(--gray-200); color: var(--gray-600); }
+
+  .station-stats {
+    padding: 10px 18px 8px; display: flex; gap: 28px; flex-wrap: wrap;
+    font-size: 0.78rem; color: var(--gray-600); font-family: var(--mono);
+    border-bottom: 1px solid var(--gray-200); align-items: center;
+  }
+  .bar-inline { display: flex; align-items: center; gap: 8px; }
+  .bar-track { background: var(--gray-200); border-radius: 2px; overflow: hidden; display: inline-block; height: 5px; }
+  .bar-fill { height: 100%; border-radius: 2px; }
+  .bf-ok   { background: var(--green); }
+  .bf-warn { background: var(--warn-border); }
+  .bf-red  { background: var(--red); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--gray-100); font-size: 0.66rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400);
+    padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--gray-200);
+  }
+  th.r, td.r { text-align: right; }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--gray-200); }
+  tbody tr:hover td { background: var(--red-light); }
+  tbody tr.rwarn td { background: var(--warn-bg); }
+  tbody tr.rwarn:hover td { background: #fff0c0; }
+  td { padding: 8px 12px; font-family: var(--mono); font-size: 0.78rem; vertical-align: middle; }
+  td.pname { font-weight: 500; }
+  .wflag { color: var(--warn-border); margin-left: 5px; font-size: 0.7rem; }
+  .wnum  { color: var(--warn-text); font-weight: 600; }
+  .pct-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .bar-sm { width: 80px; height: 5px; background: var(--gray-200); border-radius: 2px; overflow: hidden; }
+  .pct-label { font-size: 0.76rem; min-width: 40px; text-align: right; }
+  .lseen { color: var(--gray-400); font-size: 0.74rem; }
+
+  .export-bar { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--sans); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em;
+    padding: 9px 18px; border: none; border-radius: 2px; cursor: pointer;
+    transition: background 0.15s; text-transform: uppercase;
+  }
+  .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-p { background: var(--red); color: white; }
+  .btn-p:hover { background: var(--red-dark); }
+  .btn-s { background: var(--gray-100); color: var(--gray-900); border: 1px solid var(--gray-200); }
+  .btn-s:hover { background: var(--gray-200); }
+
+  #results { display: none; }
+  #results.on { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="12,2 22,7 12,12 2,7"/>
+      <polyline points="2,17 12,22 22,17"/>
+      <polyline points="2,12 12,17 22,12"/>
+    </svg>
+  </div>
+  <h1>GeoMoS Monitor Analyzer <span>/ TPS Station Report</span></h1>
+</header>
+
+<main>
+  <div id="drop-zone">
+    <input type="file" id="file-input" accept=".txt">
+    <div class="drop-icon">📂</div>
+    <p><strong>Drop a GeoMoS .txt export here</strong> or click to browse</p>
+    <div id="file-name">No file loaded</div>
+  </div>
+
+  <div id="results">
+    <div class="section-title">File Summary</div>
+    <div class="summary-grid" id="summary-cards"></div>
+    <div class="time-note" id="time-note"></div>
+    <div class="legend">
+      <span><div class="ldot" style="background:var(--green)"></div> ≥ target (24 or 48)</span>
+      <span><div class="ldot" style="background:var(--warn-border)"></div> 50–99% of target</span>
+      <span><div class="ldot" style="background:var(--red)"></div> &lt; 50% of target — highlighted</span>
+    </div>
+
+    <div class="section-title">TPS Stations — Last 24 Hours</div>
+    <div id="station-blocks"></div>
+
+    <div class="export-bar">
+      <button class="btn btn-p" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>Export CSV
+      </button>
+      <button class="btn btn-s" onclick="exportTXT()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>Export TXT
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ── Hardcoded station config ───────────────────────────────────────────────
+  const STATION_CONFIG = {
+    'TPS_LAN':    50,
+    'TPS_LOG':    43,
+    'TPS_Massan': 21,
+    'TPS_Rondo':  41,
+    'TPS_UNI':    53,
+    'TPS_WTC':    37,
+    'SVV_STN_1':  23,
+    'STN1':       28,
+    'STN2':       61,
+    'HALLTS01':   37,
+    'HALLTS02':   40,
+  };
+  const TARGET = 24;   // expected measurements per point per 24h
+  const WARN   = 12;   // highlight if below this
+
+  let result = null;
+
+  // ── File handling ──────────────────────────────────────────────────────────
+  const dropZone  = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0]; if (f) handleFile(f);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+  function handleFile(file) {
+    document.getElementById('file-name').textContent = file.name + '  —  reading…';
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('file-name').textContent = file.name;
+      analyze(ev.target.result, file.name);
+    };
+    reader.readAsText(file);
+  }
+
+  // ── Fast timestamp parser (avoids slow Date() in tight loop) ──────────────
+  function parseTs(s) {
+    // "2026-04-10 10:10:40"
+    if (!s || s.length < 19) return null;
+    const yr = s.charCodeAt(0)*1000 + s.charCodeAt(1)*100 + s.charCodeAt(2)*10 + s.charCodeAt(3)
+             - 48*1111;
+    const mo = s.charCodeAt(5)*10 + s.charCodeAt(6) - 48*11 - 1;
+    const dy = s.charCodeAt(8)*10 + s.charCodeAt(9) - 48*11;
+    const hr = s.charCodeAt(11)*10 + s.charCodeAt(12) - 48*11;
+    const mn = s.charCodeAt(14)*10 + s.charCodeAt(15) - 48*11;
+    const sc = s.charCodeAt(17)*10 + s.charCodeAt(18) - 48*11;
+    if (mo < 0 || mo > 11 || dy < 1 || hr > 23 || mn > 59 || sc > 59) return null;
+    return new Date(yr, mo, dy, hr, mn, sc).getTime();
+  }
+
+  // ── Analysis — single pass over lines, no large temp arrays ───────────────
+  function analyze(text, filename) {
+    const lines = text.split('\n');
+    const start = (lines.length && lines[0].startsWith('Name;')) ? 1 : 0;
+
+    const stations = {};
+    let totalRows = 0;
+    let maxTs = -Infinity;
+
+    for (let i = start; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line || line.length < 25) continue;
+
+      const s1 = line.indexOf(';'); if (s1 < 0) continue;
+      const s2 = line.indexOf(';', s1+1); if (s2 < 0) continue;
+      const s3 = line.indexOf(';', s2+1); if (s3 < 0) continue;
+      const s4 = line.indexOf(';', s3+1);
+
+      const name    = line.slice(0, s1);
+      const station = line.slice(s2+1, s3);
+      const dtm     = line.slice(s3+1, s4 > 0 ? s4 : line.length);
+
+      // Accept any non-empty station name
+      if (!station) continue;
+
+      const ts = parseTs(dtm);
+      if (ts === null) continue;
+      if (ts > maxTs) maxTs = ts;
+      totalRows++;
+
+      let st = stations[station];
+      if (!st) {
+        st = stations[station] = { name: station, firstTs: ts, lastTs: ts, buf: [] };
+      } else {
+        if (ts < st.firstTs) st.firstTs = ts;
+        if (ts > st.lastTs)  st.lastTs  = ts;
+      }
+      st.buf.push(name, ts);
+    }
+
+    if (!totalRows) { alert('No valid TPS data found in this file.'); return; }
+
+    const cutoff = maxTs - 86400000;
+
+    // Build per-station point stats from 24h window
+    for (const st of Object.values(stations)) {
+      const points = {};
+      const buf = st.buf;
+      for (let j = 0; j < buf.length; j += 2) {
+        const nm = buf[j];
+        const ts = buf[j+1];
+        if (ts < cutoff) continue;
+        let p = points[nm];
+        if (!p) { p = points[nm] = { count: 0, lastTs: 0 }; }
+        p.count++;
+        if (ts > p.lastTs) p.lastTs = ts;
+      }
+      // Set target based on 24h count — >30 measurements in 24h means 48/day cycle
+      for (const p of Object.values(points)) {
+        p.target = p.count > 30 ? 48 : TARGET;
+      }
+      st.buf = null; // free memory
+
+      const expected = STATION_CONFIG[st.name] !== undefined ? STATION_CONFIG[st.name] : Object.keys(points).length;
+      st.expected       = expected;
+      st.points         = points;
+      st.unique24h      = Object.keys(points).length;
+      st.totalMeas24h   = Object.values(points).reduce((s,p) => s + p.count, 0);
+      st.covPct         = (st.unique24h / expected) * 100;
+    }
+
+    result = { stations, maxTs, cutoff, filename, totalRows };
+    render(result);
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function render(res) {
+    const { stations, maxTs, cutoff, totalRows } = res;
+    const sts = Object.values(stations).sort((a,b) => a.name.localeCompare(b.name));
+
+    const totalMeas  = sts.reduce((s,st) => s + st.totalMeas24h, 0);
+    const totalPts   = sts.reduce((s,st) => s + st.unique24h, 0);
+    const avgCov     = sts.length ? sts.reduce((s,st) => s + st.covPct, 0) / sts.length : 0;
+
+    // Count warnings: points below WARN + expected-but-missing points
+    let warnCount = 0;
+    for (const st of sts) {
+      for (const p of Object.values(st.points)) { const wt = Math.round((p.target || TARGET) / 2); if (p.count < wt) warnCount++; }
+      warnCount += Math.max(0, st.expected - st.unique24h);
+    }
+
+    document.getElementById('summary-cards').innerHTML = `
+      <div class="summary-card">
+        <div class="lbl">TPS Stations</div>
+        <div class="val">${sts.length}</div>
+        <div class="sub">in file</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Records in file</div>
+        <div class="val">${totalRows.toLocaleString()}</div>
+        <div class="sub">all rows parsed</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Points measured (24h)</div>
+        <div class="val">${totalPts}</div>
+        <div class="sub">unique points, all stations</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Measurements (24h)</div>
+        <div class="val red">${totalMeas.toLocaleString()}</div>
+        <div class="sub">total records</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Avg. point coverage</div>
+        <div class="val">${avgCov.toFixed(0)}%</div>
+        <div class="sub">of expected points</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Points below ${WARN} meas.</div>
+        <div class="val ${warnCount > 0 ? 'warn' : ''}">${warnCount}</div>
+        <div class="sub">need attention</div>
+      </div>`;
+
+    document.getElementById('time-note').textContent =
+      `Reference time: ${fmt(maxTs)}  ·  24h window from: ${fmt(cutoff)}`;
+
+    const container = document.getElementById('station-blocks');
+    container.innerHTML = '';
+
+    for (const st of sts) {
+      const sorted = Object.entries(st.points).sort((a,b) => a[0].localeCompare(b[0]));
+
+      const rows = sorted.map(([nm, p]) => {
+        const tgt = p.target || TARGET;
+        const pct   = (p.count / tgt) * 100;
+        const warnThresh = Math.round(tgt / 2);
+        const warn  = p.count < warnThresh;
+        const bfcls = p.count >= tgt ? 'bf-ok' : (warn ? 'bf-red' : 'bf-warn');
+        const ptcls = warn ? 'wnum' : '';
+        return `<tr class="${warn ? 'rwarn' : ''}">
+          <td class="pname">${nm}${warn ? '<span class="wflag">⚠</span>' : ''}</td>
+          <td class="r ${ptcls}">${p.count}<span style="color:var(--gray-400);font-weight:400"> / ${tgt}</span></td>
+          <td class="r">
+            <div class="pct-cell">
+              <div class="bar-sm"><div class="bar-fill ${bfcls}" style="width:${Math.min(pct,100).toFixed(0)}%;height:100%"></div></div>
+              <span class="pct-label ${ptcls}">${pct.toFixed(0)}%</span>
+            </div>
+          </td>
+          <td class="lseen">${p.lastTs ? fmt(p.lastTs) : '—'}</td>
+        </tr>`;
+      }).join('') || `<tr><td colspan="4" style="color:var(--gray-400);padding:16px 12px;font-family:var(--mono);font-size:0.78rem;">No measurements in last 24 hours</td></tr>`;
+
+      const covBf   = st.covPct >= 80 ? 'bf-ok' : 'bf-warn';
+      const covFill = Math.min(st.covPct, 100).toFixed(1);
+      const badgeCls = st.covPct >= 80 ? 'ok' : 'low';
+
+      container.innerHTML += `
+        <div class="station-block">
+          <div class="station-header">
+            <div class="sname">${st.name}</div>
+            <div class="smeta"><span>First: ${fmt(st.firstTs)}</span><span>Last: ${fmt(st.lastTs)}</span></div>
+            <span class="badge ${badgeCls}">${st.covPct.toFixed(0)}% coverage</span>
+          </div>
+          <div class="station-stats">
+            <span>Expected: <strong>${st.expected}</strong></span>
+            <span>Measured (24h): <strong>${st.unique24h}</strong></span>
+            <span>Records (24h): <strong>${st.totalMeas24h}</strong></span>
+            <span class="bar-inline">Coverage:
+              <div class="bar-track" style="width:120px">
+                <div class="bar-fill ${covBf}" style="width:${covFill}%;height:100%"></div>
+              </div>
+              <strong>${st.covPct.toFixed(1)}%</strong>
+            </span>
+          </div>
+          <table>
+            <thead><tr>
+              <th>Point Name</th>
+              <th class="r">Meas. (24h) / target</th>
+              <th class="r">% of target</th>
+              <th>Last Measured</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    document.getElementById('results').classList.add('on');
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function fmt(ts) {
+    if (!ts && ts !== 0) return '—';
+    const d = new Date(ts);
+    const p = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+
+  // ── Export ─────────────────────────────────────────────────────────────────
+  function exportCSV() {
+    if (!result) return;
+    const { stations, maxTs, cutoff } = result;
+    const hdr = ['Station','Point_Name','Measurements_24h','Target','Pct_of_Target',
+      'Below_Warning','Station_Coverage_Pct','Station_Expected','Station_Unique_24h',
+      'Station_Total_Meas_24h','Station_First_Seen','Station_Last_Seen',
+      'Point_Last_Measured','Reference_Time','Window_Start'];
+    const rows = [hdr];
+    for (const [sn, st] of Object.entries(stations).sort()) {
+      for (const [nm, p] of Object.entries(st.points).sort()) {
+        const pt = p.target || TARGET;
+        rows.push([sn, nm, p.count, pt,
+          (p.count/pt*100).toFixed(1)+'%',
+          p.count < Math.round(pt/2) ? 'YES' : 'NO',
+          st.covPct.toFixed(1)+'%', st.expected, st.unique24h, st.totalMeas24h,
+          fmt(st.firstTs), fmt(st.lastTs), p.lastTs ? fmt(p.lastTs) : '',
+          fmt(maxTs), fmt(cutoff)]);
+      }
+    }
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    dl(csv, 'GeoMoS_TPS_Report.csv', 'text/csv');
+  }
+
+  function exportTXT() {
+    if (!result) return;
+    const { stations, maxTs, cutoff, filename } = result;
+    const sts = Object.values(stations).sort((a,b) => a.name.localeCompare(b.name));
+    let o = '='.repeat(68)+'\n';
+    o += 'GeoMoS Monitor — TPS Station Report\n';
+    o += `Source file   : ${filename}\n`;
+    o += `Generated     : ${fmt(Date.now())}\n`;
+    o += `Reference time: ${fmt(maxTs)}\n`;
+    o += `24h window    : ${fmt(cutoff)} → ${fmt(maxTs)}\n`;
+    o += `Target meas.  : ${TARGET} per point (${TARGET*2} if point appears >30× in file)  |  Warning: < 50% of target\n`;
+    o += '='.repeat(68)+'\n\n';
+    for (const st of sts) {
+      o += `STATION: ${st.name}\n`;
+      o += `  First seen      : ${fmt(st.firstTs)}\n`;
+      o += `  Last seen       : ${fmt(st.lastTs)}\n`;
+      o += `  Expected points : ${st.expected}\n`;
+      o += `  Measured (24h)  : ${st.unique24h}\n`;
+      o += `  Records (24h)   : ${st.totalMeas24h}\n`;
+      o += `  Coverage        : ${st.covPct.toFixed(1)}%\n`;
+      o += `  ${'─'.repeat(60)}\n`;
+      o += `  ${'Point'.padEnd(22)} ${'Meas'.padStart(5)} ${'Tgt'.padStart(5)} ${'%Tgt'.padStart(6)}  ${'!'} Last Measured\n`;
+      o += `  ${'─'.repeat(60)}\n`;
+      for (const [nm, p] of Object.entries(st.points).sort()) {
+        const tgtE = p.target || TARGET;
+        const pct  = (p.count/tgtE*100).toFixed(0)+'%';
+        const flag = p.count < Math.round(tgtE/2) ? '⚠' : ' ';
+        o += `  ${nm.padEnd(22)} ${String(p.count).padStart(5)} ${('/'+tgtE).padStart(5)} ${pct.padStart(6)}  ${flag} ${p.lastTs ? fmt(p.lastTs) : '—'}\n`;
+      }
+      o += '\n';
+    }
+    dl(o, 'GeoMoS_TPS_Report.txt', 'text/plain');
+  }
+
+  function dl(content, filename, mime) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], {type: mime}));
+    a.download = filename;
+    a.click();
+  }
+</script>
+</body>
+</html>

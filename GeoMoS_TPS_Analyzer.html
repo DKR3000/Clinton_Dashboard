@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoMoS Free Station Analyzer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red: #CE0E2D;
+    --red-dark: #a00b22;
+    --red-light: #fdf0f2;
+    --gray-100: #f5f5f5;
+    --gray-200: #e8e8e8;
+    --gray-400: #9a9a9a;
+    --gray-600: #555;
+    --gray-900: #1a1a1a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: #fff;
+    color: var(--gray-900);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 3px solid var(--red);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-mark svg { width: 22px; height: 22px; fill: white; }
+  header h1 { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  header span { font-size: 0.78rem; font-weight: 300; color: var(--gray-400); letter-spacing: 0.02em; margin-left: 2px; }
+
+  /* MAIN LAYOUT */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  /* DROP ZONE */
+  #drop-zone {
+    border: 2px dashed var(--gray-200);
+    border-radius: 2px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  #drop-zone:hover, #drop-zone.drag-over {
+    border-color: var(--red);
+    background: var(--red-light);
+  }
+  #drop-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .drop-icon { font-size: 2.2rem; margin-bottom: 12px; color: var(--gray-400); }
+  #drop-zone p { font-size: 0.9rem; color: var(--gray-600); }
+  #drop-zone strong { color: var(--red); font-weight: 600; }
+  #file-name { margin-top: 8px; font-family: var(--mono); font-size: 0.78rem; color: var(--gray-400); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--red);
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+
+  /* STATS GRID */
+  #results { display: none; margin-top: 36px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--gray-200);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: #fff;
+    padding: 20px 18px;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-400);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    line-height: 1;
+  }
+  .stat-value.accent { color: var(--red); }
+  .stat-sub {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    margin-top: 4px;
+  }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin-bottom: 32px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+  thead tr {
+    background: var(--gray-900);
+    color: #fff;
+  }
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--gray-200); }
+  tbody tr:hover { background: var(--gray-100); }
+  tbody td {
+    padding: 9px 12px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    color: var(--gray-600);
+  }
+  tbody td:first-child { color: var(--gray-900); font-weight: 500; }
+  .valid { color: #1a8a4a; font-weight: 500; }
+  .invalid { color: var(--red); font-weight: 500; }
+  .outlier-count { font-family: var(--mono); }
+
+  /* BACKSIGHT TABLE */
+  .bs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--gray-200);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 32px;
+  }
+  .bs-card {
+    background: #fff;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bs-name { font-family: var(--mono); font-size: 0.82rem; color: var(--gray-900); font-weight: 500; }
+  .bs-count {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    background: var(--gray-100);
+    padding: 2px 10px;
+    border-radius: 2px;
+    color: var(--gray-600);
+  }
+  .bs-pct {
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    margin-left: 6px;
+  }
+
+  /* EXPORT BAR */
+  .export-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 9px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.04em;
+    border-radius: 1px;
+  }
+  button:active { transform: scale(0.97); }
+  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary:hover { background: var(--red-dark); }
+  .btn-secondary { background: var(--gray-100); color: var(--gray-900); border: 1px solid var(--gray-200); }
+  .btn-secondary:hover { background: var(--gray-200); }
+
+  /* QUALITY BADGE */
+  .q-ok { color: #1a8a4a; }
+  .q-warn { color: #c87800; }
+  .q-bad { color: var(--red); }
+
+  /* SECTION SPACING */
+  .section { margin-bottom: 36px; }
+
+  /* EMPTY */
+  #empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--gray-400);
+    font-size: 0.88rem;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    main { padding: 20px 14px 40px; }
+    header { padding: 14px 16px; }
+    .stat-value { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18L20 8.5v7L12 19.82 4 15.5v-7L12 4.18z"/></svg>
+  </div>
+  <div>
+    <h1>GeoMoS Free Station Analyzer</h1>
+    <span>Leica GeoMoS Monitor · Log Parser</span>
+  </div>
+</header>
+
+<main>
+  <div id="drop-zone">
+    <input type="file" accept=".txt" id="file-input">
+    <div class="drop-icon">📂</div>
+    <p><strong>Drop a GeoMoS log file here</strong> or click to browse</p>
+    <p style="margin-top:6px; font-size:0.78rem; color:#aaa;">Accepts .txt log files from Leica GeoMoS Monitor</p>
+    <div id="file-name"></div>
+  </div>
+
+  <div id="results">
+    <div id="empty-state" style="display:none">No free station data found in this file.</div>
+
+    <div id="content-area">
+      <!-- Summary stats -->
+      <div class="section">
+        <div class="section-title">Overview</div>
+        <div class="stats-grid" id="stats-grid"></div>
+      </div>
+
+      <!-- Export -->
+      <div class="export-bar">
+        <button class="btn-primary" onclick="exportCSV()">Export CSV</button>
+        <button class="btn-secondary" onclick="exportTXT()">Export TXT</button>
+      </div>
+
+      <!-- Last 24h free stations table -->
+      <div class="section">
+        <div class="section-title">Free Stations — Last 24 Hours</div>
+        <div class="table-wrap">
+          <table id="stations-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Timestamp</th>
+                <th>Station</th>
+                <th>Backsights</th>
+                <th>StdDev E (m)</th>
+                <th>StdDev N (m)</th>
+                <th>StdDev H (m)</th>
+                <th>Scale</th>
+                <th>Outliers</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="stations-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Backsight summary -->
+      <div class="section">
+        <div class="section-title">Backsight Usage — Last 24 Hours</div>
+        <div class="bs-grid" id="bs-grid"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let parsedData = null;
+
+// ─── File input handling ─────────────────────────────────────────────────────
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) readFile(fileInput.files[0]);
+});
+
+function readFile(file) {
+  document.getElementById('file-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      parsedData = parseLog(e.target.result);
+      render(parsedData);
+    } catch(err) {
+      alert('Error parsing file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ─── Parser ───────────────────────────────────────────────────────────────────
+function parseLog(text) {
+  const lines = text.split('\n');
+
+  // Group lines into "blocks" — each free station calculation is a block ending at "Free station valid." or "Free station invalid."
+  // We'll parse sequentially
+
+  const allStations = [];
+
+  // We'll scan for "Results of free station calculation (Reduced)" blocks
+  // Each such block has: timestamp, station name (from surrounding context),
+  // Standard Deviations, Scale, Number of measured reference points, Free station valid/invalid
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Detect the reduced result block
+    if (line.includes('Results of free station calculation (Reduced)')) {
+      const ts = parseTimestamp(line);
+      const stationName = extractStationFromContext(lines, i);
+
+      const station = {
+        timestamp: ts,
+        stationName: stationName,
+        stdDevE: null,
+        stdDevN: null,
+        stdDevH: null,
+        scale: null,
+        backsights: [],
+        numRef: null,
+        valid: null,
+        outliers: 0
+      };
+
+      // Scan forward within this block
+      let j = i + 1;
+      while (j < lines.length && j < i + 60) {
+        const l = lines[j];
+
+        if (l.includes('Standard Deviations:')) {
+          const m = l.match(/Standard Deviations:\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)/);
+          if (m) { station.stdDevE = parseFloat(m[1]); station.stdDevN = parseFloat(m[2]); station.stdDevH = parseFloat(m[3]); }
+        }
+
+        if (l.includes('Scale:')) {
+          const m = l.match(/Scale:\s*([\d.]+)/);
+          if (m) station.scale = parseFloat(m[1]);
+        }
+
+        if (l.includes('Number of measured reference points:')) {
+          const m = l.match(/Number of measured reference points:\s*(\d+)/);
+          if (m) station.numRef = parseInt(m[1]);
+        }
+
+        if (l.includes('Free station valid.')) { station.valid = true; break; }
+        if (l.includes('Free station invalid.')) { station.valid = false; break; }
+
+        // Count outliers from point lines (lines with (* ) marker)
+        if (l.match(/\(\*\)/)) station.outliers++;
+
+        j++;
+      }
+
+      // Extract backsight names from the raw measurement lines before this block
+      // Look back for "hz=..." lines that precede this block
+      station.backsights = extractBacksights(lines, i);
+
+      allStations.push(station);
+      i = j + 1;
+      continue;
+    }
+    i++;
+  }
+
+  // Determine "last 24h" window from the latest timestamp in the file
+  const validTs = allStations.filter(s => s.timestamp).map(s => s.timestamp);
+  const latestTs = validTs.length ? Math.max(...validTs) : Date.now();
+  const cutoff24h = latestTs - 24 * 60 * 60 * 1000;
+
+  const last24h = allStations.filter(s => s.timestamp && s.timestamp >= cutoff24h);
+
+  // Backsight usage in last 24h
+  const bsMap = {};
+  last24h.forEach(s => {
+    s.backsights.forEach(bs => {
+      bsMap[bs] = (bsMap[bs] || 0) + 1;
+    });
+  });
+
+  // Total possible = last24h.length * (avg backsights per station)
+  const totalBsMeasured = Object.values(bsMap).reduce((a,b) => a+b, 0);
+  const maxPerBs = last24h.length;
+
+  const bsStats = Object.entries(bsMap)
+    .map(([name, count]) => ({ name, count, pct: maxPerBs ? (count / maxPerBs * 100).toFixed(1) : '0.0' }))
+    .sort((a,b) => a.name.localeCompare(b.name));
+
+  return {
+    allStations,
+    last24h,
+    latestTs,
+    cutoff24h,
+    bsStats,
+    totalAll: allStations.length,
+    totalValid: allStations.filter(s => s.valid).length,
+    total24h: last24h.length,
+    valid24h: last24h.filter(s => s.valid).length,
+    bsPct24h: maxPerBs > 0 ? (totalBsMeasured / (maxPerBs * Math.max(...Object.values(bsMap).concat([1]))) * 100).toFixed(1) : 'N/A'
+  };
+}
+
+function parseTimestamp(line) {
+  const m = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+  if (!m) return null;
+  return new Date(m[1]).getTime();
+}
+
+function fmtTs(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return d.toISOString().replace('T', ' ').substring(0, 19);
+}
+
+function extractStationFromContext(lines, idx) {
+  // Look for "Processing pointgroup '...'" in the 40 lines above
+  for (let k = Math.max(0, idx - 80); k < idx; k++) {
+    const m = lines[k].match(/Processing pointgroup '([^']+)'/);
+    if (m) return m[1];
+  }
+  // fallback: look for "Surveying computation of pointgroup"
+  for (let k = Math.max(0, idx - 80); k < idx; k++) {
+    const m = lines[k].match(/Surveying computation of pointgroup '([^']+)'/);
+    if (m) return m[1];
+  }
+  return '—';
+}
+
+function extractBacksights(lines, idx) {
+  // Look back for hz= lines in the window just before "Results of free station calculation (Reduced)"
+  // but after the "Raw meas:" marker or after the previous "Free station" block end
+  const bsList = [];
+  const seen = new Set();
+
+  // Scan back up to 80 lines
+  for (let k = idx - 1; k >= Math.max(0, idx - 80); k--) {
+    const l = lines[k];
+    // Stop if we hit a previous "Free station" result
+    if (l.includes('Free station valid.') || l.includes('Free station invalid.')) break;
+
+    const m = l.match(/Info\s+(\w+),\s+hz=[\d.]+,\s+v=[\d.]+,\s+d=[\d.]+/);
+    if (m && !seen.has(m[1])) {
+      seen.add(m[1]);
+      bsList.unshift(m[1]);
+    }
+  }
+  return bsList;
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render(data) {
+  document.getElementById('results').style.display = 'block';
+
+  if (data.total24h === 0 && data.totalAll === 0) {
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('content-area').style.display = 'none';
+    return;
+  }
+
+  // ── Stats cards ──
+  const statsGrid = document.getElementById('stats-grid');
+
+  const latestStation = data.last24h[data.last24h.length - 1];
+  const avgStdDevE = avg(data.last24h.map(s => s.stdDevE).filter(v => v !== null));
+  const avgStdDevN = avg(data.last24h.map(s => s.stdDevN).filter(v => v !== null));
+  const avgStdDevH = avg(data.last24h.map(s => s.stdDevH).filter(v => v !== null));
+
+  // Backsight pct = (how many times backsights were observed in 24h) / (total possible if all observed every time)
+  const totalBsObserved = data.bsStats.reduce((s, b) => s + b.count, 0);
+  const maxBsObs = data.bsStats.length > 0 ? data.total24h * data.bsStats.length : 1;
+  const bsPct = maxBsObs > 0 ? (totalBsObserved / maxBsObs * 100).toFixed(1) : '—';
+
+  const cards = [
+    { label: 'Free Stations (24h)', value: data.total24h, sub: `${data.totalAll} total in file` },
+    { label: 'Valid (24h)', value: data.valid24h, sub: data.total24h > 0 ? `${(data.valid24h/data.total24h*100).toFixed(0)}% success rate` : '—', accent: true },
+    { label: 'Unique Backsights (24h)', value: data.bsStats.length, sub: `${totalBsObserved} total observations` },
+    { label: 'Backsight Coverage', value: bsPct + '%', sub: 'vs max possible' },
+    { label: 'Avg StdDev E', value: avgStdDevE !== null ? avgStdDevE.toFixed(4) + ' m' : '—', sub: 'last 24h' },
+    { label: 'Avg StdDev N', value: avgStdDevN !== null ? avgStdDevN.toFixed(4) + ' m' : '—', sub: 'last 24h' },
+    { label: 'Avg StdDev H', value: avgStdDevH !== null ? avgStdDevH.toFixed(4) + ' m' : '—', sub: 'last 24h' },
+    { label: 'Latest Fix', value: latestStation ? fmtTs(latestStation.timestamp).slice(11,16) : '—', sub: latestStation ? fmtTs(latestStation.timestamp).slice(0,10) : '' },
+  ];
+
+  statsGrid.innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div class="stat-label">${c.label}</div>
+      <div class="stat-value ${c.accent ? 'accent' : ''}">${c.value}</div>
+      ${c.sub ? `<div class="stat-sub">${c.sub}</div>` : ''}
+    </div>
+  `).join('');
+
+  // ── Free station table ──
+  const tbody = document.getElementById('stations-tbody');
+  tbody.innerHTML = data.last24h.map((s, i) => {
+    const sdE = s.stdDevE !== null ? s.stdDevE.toFixed(4) : '—';
+    const sdN = s.stdDevN !== null ? s.stdDevN.toFixed(4) : '—';
+    const sdH = s.stdDevH !== null ? s.stdDevH.toFixed(4) : '—';
+    const scale = s.scale !== null ? s.scale.toFixed(8) : '—';
+    const qClass = sdQuality(s.stdDevE, s.stdDevN, s.stdDevH);
+    return `<tr>
+      <td>${i + 1}</td>
+      <td>${fmtTs(s.timestamp)}</td>
+      <td>${s.stationName}</td>
+      <td>${s.backsights.length > 0 ? s.backsights.length : (s.numRef || '—')}</td>
+      <td class="${qClass}">${sdE}</td>
+      <td class="${qClass}">${sdN}</td>
+      <td class="${qClass}">${sdH}</td>
+      <td>${scale}</td>
+      <td>${s.outliers > 0 ? `<span class="q-warn">${s.outliers}</span>` : '0'}</td>
+      <td class="${s.valid ? 'valid' : 'invalid'}">${s.valid ? 'Valid' : 'Invalid'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:#aaa;padding:20px">No data in last 24 hours</td></tr>';
+
+  // ── Backsight grid ──
+  const bsGrid = document.getElementById('bs-grid');
+  bsGrid.innerHTML = data.bsStats.map(b => `
+    <div class="bs-card">
+      <span class="bs-name">${b.name}</span>
+      <span><span class="bs-count">${b.count} / ${data.total24h}</span><span class="bs-pct">${b.pct}%</span></span>
+    </div>
+  `).join('') || '<div style="padding:16px;color:#aaa;font-size:0.82rem">No backsight data found</div>';
+}
+
+function avg(arr) {
+  if (!arr.length) return null;
+  return arr.reduce((a,b) => a+b, 0) / arr.length;
+}
+
+function sdQuality(e, n, h) {
+  const vals = [e, n, h].filter(v => v !== null);
+  if (!vals.length) return '';
+  const max = Math.max(...vals);
+  if (max <= 0.003) return 'q-ok';
+  if (max <= 0.010) return 'q-warn';
+  return 'q-bad';
+}
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!parsedData) return;
+  const header = ['#','Timestamp','Station','Backsights','StdDev_E_m','StdDev_N_m','StdDev_H_m','Scale','Outliers','Status'];
+  const rows = parsedData.last24h.map((s, i) => [
+    i+1,
+    fmtTs(s.timestamp),
+    s.stationName,
+    s.backsights.length || s.numRef || '',
+    s.stdDevE !== null ? s.stdDevE : '',
+    s.stdDevN !== null ? s.stdDevN : '',
+    s.stdDevH !== null ? s.stdDevH : '',
+    s.scale !== null ? s.scale : '',
+    s.outliers,
+    s.valid ? 'Valid' : 'Invalid'
+  ]);
+  const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+  download(csv, 'GeoMoS_FreeStations_24h.csv', 'text/csv');
+}
+
+function exportTXT() {
+  if (!parsedData) return;
+  const d = parsedData;
+  const ts24 = d.last24h.length > 0 ? `${fmtTs(d.cutoff24h)} → ${fmtTs(d.latestTs)}` : '—';
+
+  const totalBsObs = d.bsStats.reduce((s,b) => s+b.count, 0);
+  const maxBsObs = d.bsStats.length > 0 ? d.total24h * d.bsStats.length : 1;
+  const bsPct = maxBsObs > 0 ? (totalBsObs / maxBsObs * 100).toFixed(1) : '—';
+
+  let txt = `GEOMOSMONITOR FREE STATION ANALYSIS REPORT
+Generated: ${new Date().toISOString().replace('T',' ').slice(0,19)}
+${'─'.repeat(60)}
+
+OVERVIEW
+  Total free stations in file : ${d.totalAll}
+  Free stations (last 24h)    : ${d.total24h}
+  Valid (last 24h)             : ${d.valid24h}
+  Time window (24h)            : ${ts24}
+  Unique backsights (24h)      : ${d.bsStats.length}
+  Backsight coverage (24h)     : ${bsPct}%
+
+${'─'.repeat(60)}
+FREE STATIONS — LAST 24 HOURS
+${'─'.repeat(60)}
+${'#'.padEnd(4)} ${'Timestamp'.padEnd(20)} ${'Station'.padEnd(32)} ${'BS'.padEnd(4)} ${'SDE'.padEnd(8)} ${'SDN'.padEnd(8)} ${'SDH'.padEnd(8)} ${'Scale'.padEnd(14)} ${'Outlr'} Status
+${'-'.repeat(110)}
+${d.last24h.map((s,i) => [
+  String(i+1).padEnd(4),
+  fmtTs(s.timestamp).padEnd(20),
+  s.stationName.padEnd(32),
+  String(s.backsights.length || s.numRef || '').padEnd(4),
+  (s.stdDevE !== null ? s.stdDevE.toFixed(4) : '—').padEnd(8),
+  (s.stdDevN !== null ? s.stdDevN.toFixed(4) : '—').padEnd(8),
+  (s.stdDevH !== null ? s.stdDevH.toFixed(4) : '—').padEnd(8),
+  (s.scale !== null ? s.scale.toFixed(8) : '—').padEnd(14),
+  String(s.outliers).padEnd(6),
+  s.valid ? 'Valid' : 'Invalid'
+].join(' ')).join('\n')}
+
+${'─'.repeat(60)}
+BACKSIGHT USAGE — LAST 24 HOURS (${d.total24h} free stations)
+${'─'.repeat(60)}
+${d.bsStats.map(b => `  ${b.name.padEnd(20)} ${String(b.count).padStart(3)} / ${d.total24h}  (${b.pct}%)`).join('\n')}
+`;
+  download(txt, 'GeoMoS_FreeStation_Report.txt', 'text/plain');
+}
+
+function download(content, filename, mime) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+  a.download = filename;
+  a.click();
+}
+</script>
+</body>
+</html>
