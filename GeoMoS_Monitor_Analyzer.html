@@ -134,6 +134,26 @@
   .btn-s { background: var(--gray-100); color: var(--gray-900); border: 1px solid var(--gray-200); }
   .btn-s:hover { background: var(--gray-200); }
 
+
+  /* HOURLY CHART */
+  .chart-wrap {
+    padding: 16px 18px 14px;
+    border-top: 1px solid var(--gray-200);
+    background: #fafafa;
+  }
+  .chart-title {
+    font-size: 0.66rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 10px;
+  }
+  .chart-svg { width: 100%; overflow: visible; display: block; }
+  .chart-bar { fill: var(--red); opacity: 0.85; transition: opacity 0.15s; }
+  .chart-bar:hover { opacity: 1; }
+  .chart-bar.warn { fill: var(--warn-border); }
+  .chart-bar.ok   { fill: var(--green); }
+  .chart-axis-label { font-family: var(--mono); font-size: 9px; fill: var(--gray-400); text-anchor: middle; }
+  .chart-value-label { font-family: var(--mono); font-size: 9px; fill: var(--gray-600); text-anchor: middle; }
+  .chart-gridline { stroke: var(--gray-200); stroke-width: 1; }
+
   #results { display: none; }
   #results.on { display: block; }
 </style>
@@ -197,10 +217,10 @@
     'TPS_UNI':    53,
     'TPS_WTC':    37,
     'SVV_STN_1':  23,
-    'STN1':       28,
-    'STN2':       61,
     'HALLTS01':   37,
     'HALLTS02':   40,
+    'STN1':       28,
+    'STN2':       65,
   };
   const TARGET = 24;   // expected measurements per point per 24h
   const WARN   = 12;   // highlight if below this
@@ -291,6 +311,7 @@
     // Build per-station point stats from 24h window
     for (const st of Object.values(stations)) {
       const points = {};
+      const hourly = new Array(24).fill(0);
       const buf = st.buf;
       for (let j = 0; j < buf.length; j += 2) {
         const nm = buf[j];
@@ -300,11 +321,17 @@
         if (!p) { p = points[nm] = { count: 0, lastTs: 0 }; }
         p.count++;
         if (ts > p.lastTs) p.lastTs = ts;
+        // hourly bucket: index 0 = oldest hour, 23 = most recent
+        const hIdx = Math.floor((ts - cutoff) / 3600000);
+        if (hIdx >= 0 && hIdx < 24) {
+          hourly[hIdx] = (hourly[hIdx] || 0) + 1;
+        }
       }
       // Set target based on 24h count — >30 measurements in 24h means 48/day cycle
       for (const p of Object.values(points)) {
         p.target = p.count > 30 ? 48 : TARGET;
       }
+      st.hourly = hourly;
       st.buf = null; // free memory
 
       const expected = STATION_CONFIG[st.name] !== undefined ? STATION_CONFIG[st.name] : Object.keys(points).length;
@@ -427,10 +454,69 @@
             </tr></thead>
             <tbody>${rows}</tbody>
           </table>
+          <div class="chart-wrap">
+            <div class="chart-title">Measurements per hour — last 24h</div>
+            ${renderHourlyChart(st.hourly, st.maxTs || maxTs, cutoff)}
+          </div>
         </div>`;
     }
 
     document.getElementById('results').classList.add('on');
+  }
+
+
+  // ── Hourly bar chart ───────────────────────────────────────────────────────
+  function renderHourlyChart(hourly, refTs, cutoff) {
+    const W = 900, H = 80, padL = 28, padR = 8, padT = 4, padB = 22;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+    const n = 24;
+    const bw = plotW / n;
+    const maxVal = Math.max(...hourly, 1);
+
+    // grid lines at 25% intervals
+    let gridLines = '';
+    for (let g = 1; g <= 4; g++) {
+      const gv = Math.round(maxVal * g / 4);
+      const gy = padT + plotH - (gv / maxVal) * plotH;
+      gridLines += `<line class="chart-gridline" x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke-dasharray="3,3"/>`;
+      gridLines += `<text class="chart-axis-label" x="${padL - 4}" y="${(gy + 3).toFixed(1)}" text-anchor="end">${gv}</text>`;
+    }
+    // zero line
+    gridLines += `<line class="chart-gridline" x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}"/>`;
+
+    let bars = '', labels = '';
+    for (let i = 0; i < n; i++) {
+      const v = hourly[i] || 0;
+      const barH = v > 0 ? Math.max((v / maxVal) * plotH, 2) : 0;
+      const x = padL + i * bw;
+      const y = padT + plotH - barH;
+      const mid = x + bw / 2;
+
+      // Hour label: show actual clock hour
+      const hourTs = cutoff + i * 3600000;
+      const d = new Date(hourTs);
+      const hLabel = String(d.getHours()).padStart(2,'0') + ':00';
+      const showLabel = n <= 24; // always show for 24 bars, every other if more
+
+      bars += `<rect class="chart-bar" x="${(x + 1).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${barH.toFixed(1)}" rx="1">
+        <title>${hLabel} — ${v} measurements</title>
+      </rect>`;
+
+      // Value label on top of bar if bar is tall enough
+      if (barH > 12 && v > 0) {
+        bars += `<text class="chart-value-label" x="${mid.toFixed(1)}" y="${(y - 2).toFixed(1)}">${v}</text>`;
+      }
+
+      // Hour axis label every 2 hours
+      if (i % 2 === 0) {
+        labels += `<text class="chart-axis-label" x="${mid.toFixed(1)}" y="${(padT + plotH + 13).toFixed(1)}">${hLabel}</text>`;
+      }
+    }
+
+    return `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      ${gridLines}${bars}${labels}
+    </svg>`;
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
