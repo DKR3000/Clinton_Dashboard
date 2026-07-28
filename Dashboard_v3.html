@@ -481,7 +481,7 @@
                             <a href="https://geomosnow.leica-geosystems.com/GeoMoSNow/Login.aspx" class="link-button" target="_blank">GeoMoS Now!</a>
                         </li>
                         <li class="link-item">
-                            <a href="https://login.teamviewer.com/nav/home" class="link-button" target="_blank">GeoMoS Monitor via TeamViewer</a>
+                            <button class="link-button" onclick="openInfoPanel('Comgate')">Leica Comgate</button>
                         </li>
                         <li class="link-item">
                             <button class="link-button" onclick="openInfoPanel('GNSS')">Leica GNSS Mottagare</button>
@@ -549,13 +549,19 @@
                     <ul class="links-list">
                         <li class="link-item">
                             <div class="link-with-info">
-                                <a href="https://loadsensing.wocs3.com/30473" class="link-button" target="_blank">Ballsered - Gateway 30473</a>
+                                <a href="https://loadsensing.wocs3.com/26627" class="link-button" target="_blank">Bokenäs - Gateway 26627</a>
+                                <button class="info-btn" onclick="openInfoPanel('Bokenas')">Info</button>
+                            </div>
+                        </li>
+                        <li class="link-item">
+                            <div class="link-with-info">
+                                <a href="https://loadsensing.wocs3.com/30473" class="link-button" target="_blank">Pilekrogen - Gateway 30473</a>
                                 <button class="info-btn" onclick="openInfoPanel('ballsered')">Info</button>
                             </div>
                         </li>
                         <li class="link-item">
                             <div class="link-with-info">
-                                <a href="https://loadsensing.wocs3.com/30753" class="link-button" target="_blank">Lärje - Gateway 30753</a>
+                                <a href="https://loadsensing.wocs3.com/30753" class="link-button" target="_blank">Masthuggskajen - Gateway 30753</a>
                                 <button class="info-btn" onclick="openInfoPanel('skurubron')">Info</button>
                             </div>
                         </li>
@@ -575,12 +581,6 @@
                             <div class="link-with-info">
                                 <a href="https://loadsensing.wocs3.com/32371" class="link-button" target="_blank">UPK - Gateway 32371</a>
                                 <button class="info-btn" onclick="openInfoPanel('UPK')">Info</button>
-                            </div>
-                        </li>
-                        <li class="link-item">
-                            <div class="link-with-info">
-                                <a href="https://loadsensing.wocs3.com/26627" class="link-button" target="_blank">Bokenäs - Gateway 26627</a>
-                                <button class="info-btn" onclick="openInfoPanel('Bokenas')">Info</button>
                             </div>
                         </li>
                         <li class="link-item">
@@ -626,7 +626,7 @@
                     </div>
                     <ul class="links-list">
                         <li class="link-item">
-                            <a href="https://preview--clinton-gear-guard.lovable.app/" class="link-button" target="_blank">Clinton Asset Manager</a>
+                            <a href="https://preview--clinton-gear-guard.lovable.app/equipment/" class="link-button" target="_blank">Clinton Asset Manager</a>
                         </li>
                         <li class="link-item">
                             <a href="https://preview--clinton-gear-guard.lovable.app/drift" class="link-button" target="_blank">Drift</a>
@@ -793,11 +793,11 @@ let uploadedFiles = [];
         // Info panel data - add your project details here later
         const projectInfo = {
             ballsered: {
-                title: "Ballsered - Gateway 30473",
+                title: "Pilekrogen - Gateway 30473",
                 content: "chae7Eisu"
             },
             skurubron: {
-                title: "Lärje - Gateway 30753",
+                title: "Masthuggskajen - Gateway 30753",
                 content: "thaaHoh9i"
             },
             vargon: {
@@ -833,7 +833,22 @@ let uploadedFiles = [];
                         <p><a href="http://78.79.221.93/index.lsp" target="_blank" style="color: #CE0E2D;">_(GPS09)</a></p>
                         </p>
                         `
-            }
+            },
+            Comgate: {
+                title: "Comgate",
+                content: `
+                        <p><strong>Korsvägen E05</strong></p>
+                        <p><a href="http://94.234.166.250/index.lsp target="_blank" style="color: #CE0E2D;">TPS1_373442_WTC</a></p>
+                        <p><a href="http://94.234.167.3/index.lsp target="_blank" style="color: #CE0E2D;">TPS2_373443_Universeum</a></p>
+                        <p><a href="http://94.234.167.5/index.lsp" target="_blank" style="color: #CE0E2D;">TPS3_373722_Landriet</a></p>
+                        <p><a href="http://94.234.167.12/index.lsp" target="_blank" style="color: #CE0E2D;">TPS_373425_Rondo</a></p>
+                        <p><a href="http://94.234.167.6/index.lsp" target="_blank" style="color: #CE0E2D;">TPS_373459_Massan</a></p>
+                        <p><a href="http://94.234.167.9/index.lsp" target="_blank" style="color: #CE0E2D;">TPS_373226_LOGEN</a></p>
+                        <p><strong>Svappavaara</strong>
+                        <p><a href="http://78.79.206.200/index.lsp" target="_blank" style="color: #CE0E2D;">Svappavaara</a></p>
+                        </p>
+                        `
+            },
         };
 
         function openInfoPanel(projectId) {
