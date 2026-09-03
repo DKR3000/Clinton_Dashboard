@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoMoS Event Log Analyzer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red: #CE0E2D;
+    --red-dark: #a00b22;
+    --red-light: #fdf0f2;
+    --warn-bg: #fff8e1;
+    --warn-border: #f9a825;
+    --warn-text: #9a6200;
+    --green: #2e7d32;
+    --green-bg: #f1f8f1;
+    --blue: #1565c0;
+    --blue-bg: #e8f0fb;
+    --gray-100: #f5f5f5;
+    --gray-200: #e8e8e8;
+    --gray-400: #9a9a9a;
+    --gray-600: #555;
+    --gray-900: #1a1a1a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); background: #fff; color: var(--gray-900); min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    border-bottom: 3px solid var(--red);
+    padding: 18px 32px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; background: var(--red);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-mark svg { width: 20px; height: 20px; }
+  header h1 { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  header h1 span { font-size: 0.78rem; font-weight: 300; color: var(--gray-400); letter-spacing: 0.02em; margin-left: 2px; }
+
+  main { max-width: 1300px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  /* DROP ZONE */
+  #drop-zone {
+    border: 2px dashed var(--gray-200); border-radius: 2px;
+    padding: 48px 24px; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s; position: relative;
+  }
+  #drop-zone:hover, #drop-zone.drag-over { border-color: var(--red); background: var(--red-light); }
+  #drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { font-size: 2.2rem; margin-bottom: 12px; color: var(--gray-400); }
+  #drop-zone p { font-size: 0.9rem; color: var(--gray-600); }
+  #drop-zone strong { color: var(--red); font-weight: 600; }
+  #file-name { margin-top: 8px; font-family: var(--mono); font-size: 0.78rem; color: var(--gray-400); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--gray-400);
+    margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200);
+  }
+
+  /* SUMMARY CARDS */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; margin-bottom: 4px; }
+  .summary-card { border: 1px solid var(--gray-200); padding: 16px 18px; border-radius: 2px; }
+  .summary-card .lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 6px; }
+  .summary-card .val { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; }
+  .summary-card .val.red   { color: var(--red); }
+  .summary-card .val.green { color: var(--green); }
+  .summary-card .val.warn  { color: var(--warn-text); }
+  .summary-card .sub { font-size: 0.72rem; color: var(--gray-400); margin-top: 3px; }
+
+  .time-note { font-size: 0.72rem; font-family: var(--mono); color: var(--gray-400); margin-top: 6px; }
+
+  /* TWO-COLUMN LAYOUT */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* BLOCK */
+  .block { border: 1px solid var(--gray-200); border-radius: 2px; overflow: hidden; margin-bottom: 20px; }
+  .block-header {
+    padding: 11px 16px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 2px solid var(--red); background: var(--gray-100);
+  }
+  .block-title { font-family: var(--mono); font-weight: 600; font-size: 0.9rem; flex: 1; }
+  .block-count { font-family: var(--mono); font-size: 0.78rem; color: var(--gray-400); }
+
+  /* STATUS BADGE */
+  .pill {
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 2px;
+  }
+  .pill-red   { background: var(--red); color: white; }
+  .pill-green { background: var(--green); color: white; }
+  .pill-warn  { background: var(--warn-border); color: white; }
+  .pill-blue  { background: var(--blue); color: white; }
+  .pill-gray  { background: var(--gray-200); color: var(--gray-600); }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--gray-100); font-size: 0.65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400);
+    padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--gray-200);
+    position: sticky; top: 0;
+  }
+  th.r, td.r { text-align: right; }
+  th.c, td.c { text-align: center; }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--gray-200); }
+  tbody tr:hover td { background: var(--red-light); }
+  td { padding: 7px 12px; font-family: var(--mono); font-size: 0.76rem; vertical-align: middle; }
+  td.ts { color: var(--gray-400); white-space: nowrap; }
+  td.point { font-weight: 500; }
+  td.reason { color: var(--gray-600); }
+
+  /* SCROLLABLE TABLE WRAPPER */
+  .tbl-wrap { max-height: 380px; overflow-y: auto; }
+
+  /* PROGRESS ROW */
+  .prog-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; }
+  .prog-row:not(:last-child) { border-bottom: 1px solid var(--gray-200); }
+  .prog-label { font-family: var(--mono); font-size: 0.8rem; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .prog-track { flex: 2; height: 6px; background: var(--gray-200); border-radius: 2px; overflow: hidden; min-width: 60px; }
+  .prog-fill { height: 100%; border-radius: 2px; }
+  .pf-red   { background: var(--red); }
+  .pf-warn  { background: var(--warn-border); }
+  .pf-green { background: var(--green); }
+  .prog-pct { font-family: var(--mono); font-size: 0.76rem; color: var(--gray-600); min-width: 42px; text-align: right; }
+  .prog-cnt { font-family: var(--mono); font-size: 0.72rem; color: var(--gray-400); min-width: 50px; text-align: right; }
+
+  /* GeoMoS push status timeline */
+  .push-list { padding: 4px 0; }
+  .push-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 14px; font-family: var(--mono); font-size: 0.76rem;
+  }
+  .push-item:not(:last-child) { border-bottom: 1px solid var(--gray-200); }
+  .push-ts { color: var(--gray-400); white-space: nowrap; min-width: 140px; }
+  .push-desc { flex: 1; color: var(--gray-900); }
+  .push-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .pd-green { background: var(--green); }
+  .pd-red   { background: var(--red); }
+  .pd-warn  { background: var(--warn-border); }
+  .pd-blue  { background: var(--blue); }
+  .pd-gray  { background: var(--gray-400); }
+
+  /* EXPORT */
+  .export-bar { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--sans); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em;
+    padding: 9px 18px; border: none; border-radius: 2px; cursor: pointer;
+    transition: background 0.15s; text-transform: uppercase;
+  }
+  .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-p { background: var(--red); color: white; }
+  .btn-p:hover { background: var(--red-dark); }
+  .btn-s { background: var(--gray-100); color: var(--gray-900); border: 1px solid var(--gray-200); }
+  .btn-s:hover { background: var(--gray-200); }
+
+
+
+  /* POINT SUCCESS CHART */
+  .pt-chart-wrap { padding: 10px 14px 14px; border-top: 1px solid var(--gray-200); background: #fafafa; }
+  .pt-chart-title { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 8px; }
+  .pt-chart-svg { width: 100%; display: block; overflow: visible; }
+  .pt-bar-ok   { fill: var(--green); }
+  .pt-bar-warn { fill: var(--warn-border); }
+  .pt-bar-lo   { fill: var(--red); }
+  .pt-axis-lbl { font-family: var(--mono); font-size: 8.5px; fill: var(--gray-600); text-anchor: middle; }
+  .pt-axis-lbl.rotated { text-anchor: end; }
+  .pt-pct-lbl  { font-family: var(--mono); font-size: 8px; fill: white; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  .pt-pct-lbl-top { font-family: var(--mono); font-size: 8px; fill: var(--gray-600); text-anchor: middle; }
+  .pt-grid     { stroke: var(--gray-200); stroke-width: 1; }
+
+  /* DAILY SUMMARY TABLE */
+  .day-section { margin-bottom: 24px; }
+  .day-label {
+    font-family: var(--mono); font-size: 0.78rem; font-weight: 600;
+    background: var(--gray-900); color: white;
+    padding: 7px 14px; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .day-avg {
+    margin-left: auto; font-size: 0.7rem; font-weight: 400; color: var(--gray-400);
+  }
+  .day-avg strong { color: white; }
+  .daily-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border: 1px solid var(--gray-200);
+    border-top: none;
+  }
+  .daily-cell {
+    padding: 10px 14px 14px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .dc-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+  .dc-station { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; }
+  .dc-group   { font-family: var(--mono); font-size: 0.8rem; font-weight: 600; color: var(--gray-900); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dc-row     { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+  .dc-track   { flex: 1; height: 7px; background: var(--gray-200); border-radius: 2px; overflow: hidden; }
+  .dc-fill    { height: 100%; border-radius: 2px; }
+  .dc-pct     { font-family: var(--mono); font-size: 0.8rem; font-weight: 600; min-width: 44px; text-align: right; }
+  .dc-meta    { font-family: var(--mono); font-size: 0.68rem; color: var(--gray-400); margin-top: 3px; }
+  .dc-pct.hi  { color: var(--green); }
+  .dc-pct.md  { color: var(--warn-text); }
+  .dc-pct.lo  { color: var(--red); }
+  .dc-fill.hi { background: var(--green); }
+  .dc-fill.md { background: var(--warn-border); }
+  .dc-fill.lo { background: var(--red); }
+
+  /* GROUP MEASUREMENT SUMMARY ROWS */
+  .grp-meta { font-size: 0.7rem; color: var(--gray-400); font-family: var(--mono); }
+
+  #results { display: none; }
+  #results.on { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+  </div>
+  <h1>GeoMoS Event Log Analyzer <span>/ CSV Log Report</span></h1>
+</header>
+
+<main>
+  <div id="drop-zone">
+    <input type="file" id="file-input" accept=".csv,.txt">
+    <div class="drop-icon">📋</div>
+    <p><strong>Drop a GeoMoS event log .csv here</strong> or click to browse</p>
+    <div id="file-name">No file loaded</div>
+  </div>
+
+  <div id="results">
+    <div class="section-title">File Summary</div>
+    <div class="summary-grid" id="summary-cards"></div>
+    <div class="time-note" id="time-note"></div>
+
+    <!-- DAILY SUMMARY -->
+    <div class="section-title">Daily Summary — Station &amp; Group (midnight to midnight)</div>
+    <div id="daily-summary"></div>
+
+    <!-- MEASUREMENT FAILURES -->
+    <div class="section-title">Measurement Failures by Point</div>
+    <div class="two-col">
+      <div>
+        <div class="block">
+          <div class="block-header">
+            <div class="block-title">Failure Reasons — Distribution</div>
+          </div>
+          <div id="reason-bars"></div>
+        </div>
+        <div class="block">
+          <div class="block-header">
+            <div class="block-title">Failed Points — by Station Group</div>
+          </div>
+          <div id="group-bars"></div>
+        </div>
+      </div>
+      <div>
+        <div class="block">
+          <div class="block-header">
+            <div class="block-title">Failed Point Log</div>
+            <span class="block-count" id="fail-count"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Timestamp</th>
+                <th>Station</th>
+                <th>Point</th>
+                <th>Reason</th>
+              </tr></thead>
+              <tbody id="fail-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP MEASUREMENT SUMMARY -->
+    <div class="section-title">Point Group Measurements</div>
+    <div class="block">
+      <div class="block-header">
+        <div class="block-title">Group Success Rate — per Station</div>
+      </div>
+      <div id="group-summary-bars"></div>
+    </div>
+    <div class="block" style="margin-top:0">
+      <div class="block-header">
+        <div class="block-title">Group Measurement Log</div>
+        <span class="block-count" id="grp-count"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Timestamp</th>
+            <th>Station</th>
+            <th>Group</th>
+            <th class="r">Measured</th>
+            <th class="r">Total</th>
+            <th class="r">Success %</th>
+          </tr></thead>
+          <tbody id="grp-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GeoMoS / PLATFORM STATUS -->
+    <div class="section-title">GeoMoS Push &amp; Web Platform Export</div>
+    <div class="two-col">
+      <div class="block">
+        <div class="block-header">
+          <div class="block-title">GeoMoS Now! Push Log</div>
+          <span class="block-count" id="push-count"></span>
+        </div>
+        <div class="tbl-wrap push-list" id="push-list"></div>
+      </div>
+      <div class="block">
+        <div class="block-header">
+          <div class="block-title">Web Platform Export Log (Query to file)</div>
+          <span class="block-count" id="query-count"></span>
+        </div>
+        <div class="tbl-wrap push-list" id="query-list"></div>
+      </div>
+    </div>
+
+    <!-- OTHER SYSTEM EVENTS -->
+    <div class="section-title">Other System Events</div>
+    <div class="block">
+      <div class="block-header"><div class="block-title">System Event Log</div></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Timestamp</th>
+            <th>Type</th>
+            <th>Station</th>
+            <th>Message</th>
+          </tr></thead>
+          <tbody id="sys-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="export-bar">
+      <button class="btn btn-p" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>Export failures CSV
+      </button>
+      <button class="btn btn-s" onclick="exportTXT()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>Export full report TXT
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ── Hardcoded point lists per station/group ──────────────────────────────
+  // Keys: "STATION|||GROUP_NAME"
+  // Add new groups here following the same pattern
+  const POINT_CONFIG = {
+    'HALL_NED|||HALL_FRI_station_TS01': [
+      'HALL01_ned','HALL02_ned','HALL05_ned','HALL06_ned',
+      'HALL07_ned','HALL09_ned','HALL10_ned'
+    ],
+    'HALL_NED|||HALL_Kontroll_TS01': [
+      'HALL01_ned','HALL02_ned','HALL04_ned','HALL05_ned',
+      'HALL06_ned','HALL07_ned','HALL09_ned','HALL10_ned'
+    ],
+    'HALL_NED|||HALL_Nedspår': [
+      'M3.5_NED','M3.6_NED','M3.7_NED','M3.8_NED',
+      'M4.1_NED','M4.2_NED','M4.3_NED','M4.4_NED','M4.5_NED','M4.6_NED','M4.7_NED','M4.8_NED',
+      'M5.1_NED','M5.2_NED','M5.3_NED','M5.4_NED','M5.5_NED','M5.6_NED','M5.7_NED','M5.8_NED',
+      'M6.1_NED','M6.2_NED','M6.3_NED','M6.4_NED','M6.5_NED','M6.6_NED','M6.7_NED',
+      'M6.8_NED','M6.9_NED','M6.10_NED'
+    ],
+    'HALL_UPP|||HALL_FRI_station_TS02': [
+      'HALL01_upp','HALL02_upp','HALL05_upp','HALL07_upp',
+      'HALL09_upp','HALL10_upp'
+    ],
+    'HALL_UPP|||HALL_Kontroll_TS02': [
+      'HALL01_upp','HALL02_upp','HALL03_upp','HALL05_upp',
+      'HALL06_upp','HALL07_upp','HALL09_upp','HALL10_upp'
+    ],
+    'HALL_UPP|||HALL_Uppspår': [
+      'M3.2_UPP','M3.3_UPP','M3.4_UPP','M3.5_UPP',
+      'M3.6_UPP','M3.7_UPP','M3.8_UPP',
+      'M4.1_UPP','M4.2_UPP','M4.3_UPP','M4.4_UPP','M4.5_UPP','M4.6_UPP','M4.7_UPP','M4.8_UPP',
+      'M5.1_UPP','M5.2_UPP','M5.3_UPP','M5.4_UPP','M5.5_UPP','M5.6_UPP','M5.7_UPP','M5.8_UPP',
+      'M6.1_UPP','M6.2_UPP','M6.3_UPP','M6.4_UPP','M6.5_UPP','M6.6_UPP',
+      'M6.7_UPP','M6.8_UPP','M6.9_UPP','M6.10_UPP'
+    ],
+  };
+
+  let result = null;
+
+  // ── File input ─────────────────────────────────────────────────────────────
+  const dropZone  = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0]; if (f) handleFile(f);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+  function handleFile(file) {
+    document.getElementById('file-name').textContent = file.name + '  —  reading…';
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('file-name').textContent = file.name;
+      analyze(ev.target.result, file.name);
+    };
+    reader.readAsText(file);
+  }
+
+  // ── Date parse: "03-09-2026 07:04:24" → timestamp ─────────────────────────
+  function parseTs(s) {
+    if (!s || s.length < 19) return null;
+    // DD-MM-YYYY HH:MM:SS
+    const dy = +s.slice(0,2), mo = +s.slice(3,5)-1, yr = +s.slice(6,10);
+    const hr = +s.slice(11,13), mn = +s.slice(14,16), sc = +s.slice(17,19);
+    if (isNaN(yr+mo+dy+hr+mn+sc)) return null;
+    return new Date(yr, mo, dy, hr, mn, sc).getTime();
+  }
+
+  // ── Analysis ───────────────────────────────────────────────────────────────
+  function analyze(text, filename) {
+    const lines = text.split('\n');
+
+    const failures   = [];  // {ts, station, point, reason}
+    const groups     = [];  // {ts, station, groupName, measured, total, pct}
+    const pushEvents = [];  // {ts, type, desc, ok}  — GeoMoS Now! push
+    const queryEvents= [];  // {ts, desc, ok}         — Query to file
+    const sysEvents  = [];  // {ts, level, station, msg} — everything else
+    const cycleMap   = {};  // dayKey|||station|||group -> cycle count
+    const pointFailMap = {}; // dayKey|||station|||point|||group -> fail count
+    const pointGroups  = {}; // station|||group -> Set of point names
+
+    let minTs = Infinity, maxTs = -Infinity;
+    let totalLines = 0;
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) continue;
+      totalLines++;
+
+      // Split on commas but max 6 parts (last field may contain commas)
+      const parts = line.split(',');
+      if (parts.length < 6) continue;
+
+      const level   = parts[0].trim();          // Message / Info
+      const dtm     = parts[1].trim();          // 03-09-2026 07:04:24
+      const station = parts[2].trim();          // HALL_NED / -
+      // parts[3] = point group id (may be empty)
+      // parts[4] = point full name [group]
+      const msg     = parts.slice(5).join(',').trim(); // last field(s)
+
+      const ts = parseTs(dtm);
+      if (ts === null) continue;
+      if (ts < minTs) minTs = ts;
+      if (ts > maxTs) maxTs = ts;
+
+      // ── Measurement failure (Message rows) ────────────────────────────────
+      if (level === 'Message') {
+        const pointFull = parts[4].trim(); // e.g. "M5.8_NED [HALL_Nedspår]"
+        // Extract clean point name (before the bracket)
+        const pname = pointFull.replace(/\s*\[.*\]/, '').trim() || parts[3].trim() || pointFull;
+        // Classify reason
+        let reason = msg;
+        const rParen = reason.indexOf('(');
+        if (rParen > 0) reason = reason.slice(0, rParen).trim(); // strip detail in parens for grouping
+        failures.push({ ts, station, point: pname || '(unknown)', reason: msg, reasonKey: reason });
+        // Track per-point failures for per-day chart
+        // Extract group name from full point string e.g. "M5.8_NED [HALL_Nedspår]"
+        const grpExtract = pointFull.match(/\[(.+?)\]/);
+        if (grpExtract) {
+          const grpName = grpExtract[1].trim();
+          const dayKey = fmtDay(ts);
+          const pfKey = dayKey + '|||' + station + '|||' + pname + '|||' + grpName;
+          pointFailMap[pfKey] = (pointFailMap[pfKey] || 0) + 1;
+          const pgKey = station + '|||' + grpName;
+          if (!pointGroups[pgKey]) pointGroups[pgKey] = new Set();
+          pointGroups[pgKey].add(pname);
+        }
+      }
+
+      // ── Info rows ─────────────────────────────────────────────────────────
+      else if (level === 'Info') {
+        // Group measurement finished
+        const grpMatch = msg.match(/Point group measurement finished\.\s*\(.*?:\s*(\d+)\/(\d+)\s*\[([0-9;,%.]+)\]/);
+        if (grpMatch) {
+          const groupName = parts[4].trim().replace(/\s*\[.*\]/, '').trim() || parts[3].trim();
+          const measured = +grpMatch[1], total = +grpMatch[2];
+          const pct = total > 0 ? (measured / total * 100) : 0;
+          groups.push({ ts, station, groupName, measured, total, pct });
+          // Track cycles per day/station/group for point success chart
+          const dayKey = fmtDay(ts);
+          const ck = dayKey + '|||' + station + '|||' + groupName;
+          cycleMap[ck] = (cycleMap[ck] || 0) + 1;
+          continue;
+        }
+
+        // GeoMoS Now! push
+        if (msg.includes('GeoMoS Now!')) {
+          const ok = msg.toLowerCase().includes('success') || msg.includes('successfully pushed');
+          const inProg = msg.includes('in progress');
+          pushEvents.push({ ts, desc: msg, ok, inProg });
+          continue;
+        }
+
+        // Query to file (web platform export)
+        if (msg.includes('Query to file')) {
+          const ok = msg.toLowerCase().includes('successful');
+          queryEvents.push({ ts, desc: msg, ok });
+          continue;
+        }
+
+        // Everything else: system events
+        sysEvents.push({ ts, level, station: station === '-' ? '—' : station, msg });
+      }
+    }
+
+    // Sort all by ts descending (newest first)
+    const byTsDesc = (a,b) => b.ts - a.ts;
+    failures.sort(byTsDesc);
+    groups.sort(byTsDesc);
+    pushEvents.sort(byTsDesc);
+    queryEvents.sort(byTsDesc);
+    sysEvents.sort(byTsDesc);
+
+    result = { failures, groups, pushEvents, queryEvents, sysEvents, cycleMap, pointFailMap, pointGroups, minTs, maxTs, filename, totalLines };
+    render(result);
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function render(res) {
+    const { failures, groups, pushEvents, queryEvents, sysEvents, minTs, maxTs, totalLines } = res;
+
+    // ── Summary cards ────────────────────────────────────────────────────────
+    const totalFail = failures.length;
+    const pushOk    = pushEvents.filter(e => e.ok).length;
+    const pushTotal = pushEvents.filter(e => e.ok || (!e.inProg)).length;
+    const queryOk   = queryEvents.filter(e => e.ok).length;
+    const queryTotal= queryEvents.length;
+
+    // Group avg success rate
+    const grpAvg = groups.length
+      ? (groups.reduce((s,g) => s + g.pct, 0) / groups.length).toFixed(1)
+      : '—';
+
+    // Unique failing points
+    const uniqueFailPts = new Set(failures.map(f => f.point)).size;
+
+    document.getElementById('summary-cards').innerHTML = `
+      <div class="summary-card">
+        <div class="lbl">Log entries</div>
+        <div class="val">${totalLines.toLocaleString()}</div>
+        <div class="sub">total rows in file</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Measurement failures</div>
+        <div class="val red">${totalFail.toLocaleString()}</div>
+        <div class="sub">${uniqueFailPts} unique points affected</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Group measurements</div>
+        <div class="val">${groups.length}</div>
+        <div class="sub">avg success ${grpAvg}%</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">GeoMoS push</div>
+        <div class="val ${pushOk === pushTotal ? 'green' : 'warn'}">${pushOk} / ${pushTotal}</div>
+        <div class="sub">successful pushes</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">Web export (Query)</div>
+        <div class="val ${queryOk === queryTotal ? 'green' : 'warn'}">${queryOk} / ${queryTotal}</div>
+        <div class="sub">successful exports</div>
+      </div>
+      <div class="summary-card">
+        <div class="lbl">System events</div>
+        <div class="val">${sysEvents.length}</div>
+        <div class="sub">info &amp; alerts</div>
+      </div>`;
+
+    document.getElementById('time-note').textContent =
+      `Log period: ${fmtTs(minTs)}  →  ${fmtTs(maxTs)}`;
+
+    // ── Reason distribution bars ──────────────────────────────────────────────
+    const reasonMap = {};
+    for (const f of failures) {
+      reasonMap[f.reasonKey] = (reasonMap[f.reasonKey] || 0) + 1;
+    }
+    const reasonSorted = Object.entries(reasonMap).sort((a,b) => b[1]-a[1]);
+    const maxR = reasonSorted[0]?.[1] || 1;
+
+    document.getElementById('reason-bars').innerHTML = reasonSorted.map(([r, n]) => {
+      const pct = (n / totalFail * 100).toFixed(1);
+      const fillPct = (n / maxR * 100).toFixed(1);
+      const cls = r.includes('not found') ? 'pf-red' : r.includes('Compensator') ? 'pf-warn' : r.includes('blunder') ? 'pf-warn' : 'pf-red';
+      return `<div class="prog-row">
+        <div class="prog-label" title="${r}">${r}</div>
+        <div class="prog-track"><div class="prog-fill ${cls}" style="width:${fillPct}%"></div></div>
+        <div class="prog-pct">${pct}%</div>
+        <div class="prog-cnt">${n} events</div>
+      </div>`;
+    }).join('') || '<div class="prog-row" style="color:var(--gray-400)">No failures found</div>';
+
+    // ── Failures by station group ─────────────────────────────────────────────
+    const grpFailMap = {};
+    for (const f of failures) {
+      const g = f.station || '—';
+      grpFailMap[g] = (grpFailMap[g] || 0) + 1;
+    }
+    const grpFailSorted = Object.entries(grpFailMap).sort((a,b) => b[1]-a[1]);
+    const maxGF = grpFailSorted[0]?.[1] || 1;
+
+    document.getElementById('group-bars').innerHTML = grpFailSorted.map(([g, n]) => {
+      const pct = (n / totalFail * 100).toFixed(1);
+      const fillPct = (n / maxGF * 100).toFixed(1);
+      return `<div class="prog-row">
+        <div class="prog-label">${g}</div>
+        <div class="prog-track"><div class="prog-fill pf-red" style="width:${fillPct}%"></div></div>
+        <div class="prog-pct">${pct}%</div>
+        <div class="prog-cnt">${n}</div>
+      </div>`;
+    }).join('') || '<div class="prog-row" style="color:var(--gray-400)">No data</div>';
+
+    // ── Failed point log table ────────────────────────────────────────────────
+    document.getElementById('fail-count').textContent = `${totalFail} events`;
+    document.getElementById('fail-table').innerHTML = failures.map(f => {
+      const pill = reasonPill(f.reasonKey);
+      return `<tr>
+        <td class="ts">${fmtTs(f.ts)}</td>
+        <td>${f.station}</td>
+        <td class="point">${f.point}</td>
+        <td class="reason">${pill} <span style="font-size:0.72rem;color:var(--gray-600)">${f.reason}</span></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" style="color:var(--gray-400);padding:14px 12px">No failures</td></tr>';
+
+    // ── Group success rate bars ────────────────────────────────────────────────
+    const stationGrpMap = {};
+    for (const g of groups) {
+      if (!stationGrpMap[g.station]) stationGrpMap[g.station] = { sum: 0, count: 0 };
+      stationGrpMap[g.station].sum += g.pct;
+      stationGrpMap[g.station].count++;
+    }
+    const stGrpSorted = Object.entries(stationGrpMap).sort((a,b) => a[0].localeCompare(b[0]));
+
+    document.getElementById('group-summary-bars').innerHTML = stGrpSorted.map(([st, d]) => {
+      const avg = (d.sum / d.count).toFixed(1);
+      const cls = +avg >= 90 ? 'pf-green' : +avg >= 70 ? 'pf-warn' : 'pf-red';
+      return `<div class="prog-row">
+        <div class="prog-label">${st}</div>
+        <div class="prog-track"><div class="prog-fill ${cls}" style="width:${Math.min(+avg,100)}%"></div></div>
+        <div class="prog-pct">${avg}%</div>
+        <div class="prog-cnt">${d.count} groups</div>
+      </div>`;
+    }).join('') || '<div class="prog-row" style="color:var(--gray-400)">No group data</div>';
+
+    // ── Group measurement log table ───────────────────────────────────────────
+    document.getElementById('grp-count').textContent = `${groups.length} entries`;
+    document.getElementById('grp-table').innerHTML = groups.map(g => {
+      const cls = g.pct >= 90 ? 'green' : g.pct >= 70 ? '' : 'red';
+      const pill = g.pct >= 90 ? '<span class="pill pill-green">OK</span>'
+                 : g.pct >= 70 ? '<span class="pill pill-warn">PARTIAL</span>'
+                 : '<span class="pill pill-red">LOW</span>';
+      return `<tr>
+        <td class="ts">${fmtTs(g.ts)}</td>
+        <td>${g.station}</td>
+        <td>${g.groupName}</td>
+        <td class="r">${g.measured}</td>
+        <td class="r">${g.total}</td>
+        <td class="r">${pill} <span style="font-family:var(--mono);font-size:0.76rem">${g.pct.toFixed(1)}%</span></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="color:var(--gray-400);padding:14px 12px">No group data</td></tr>';
+
+    // ── GeoMoS push log ───────────────────────────────────────────────────────
+    document.getElementById('push-count').textContent = `${pushEvents.length} events`;
+    document.getElementById('push-list').innerHTML = pushEvents.map(e => {
+      const dot  = e.ok ? 'pd-green' : e.inProg ? 'pd-blue' : 'pd-gray';
+      const pill = e.ok
+        ? '<span class="pill pill-green">SUCCESS</span>'
+        : e.inProg
+          ? '<span class="pill pill-blue">IN PROGRESS</span>'
+          : '<span class="pill pill-gray">INFO</span>';
+      return `<div class="push-item">
+        <div class="push-dot ${dot}"></div>
+        <div class="push-ts">${fmtTs(e.ts)}</div>
+        <div class="push-desc">${pill} <span style="color:var(--gray-600);margin-left:6px">${e.desc}</span></div>
+      </div>`;
+    }).join('') || '<div class="push-item" style="color:var(--gray-400)">No push events found</div>';
+
+    // ── Query to file log ─────────────────────────────────────────────────────
+    document.getElementById('query-count').textContent = `${queryEvents.length} events`;
+    document.getElementById('query-list').innerHTML = queryEvents.map(e => {
+      const dot  = e.ok ? 'pd-green' : 'pd-red';
+      const pill = e.ok
+        ? '<span class="pill pill-green">SUCCESS</span>'
+        : '<span class="pill pill-red">FAILED</span>';
+      // Extract description in parens
+      const detail = e.desc.match(/\(([^)]+)\)/)?.[1] || '';
+      return `<div class="push-item">
+        <div class="push-dot ${dot}"></div>
+        <div class="push-ts">${fmtTs(e.ts)}</div>
+        <div class="push-desc">${pill} <span style="color:var(--gray-600);margin-left:6px">${detail}</span></div>
+      </div>`;
+    }).join('') || '<div class="push-item" style="color:var(--gray-400)">No query events found</div>';
+
+    // ── System events table ───────────────────────────────────────────────────
+    const SKIP_SYS = ['GeoMoS Now!', 'Query to file', 'Point group measurement'];
+    const filteredSys = sysEvents.filter(e => !SKIP_SYS.some(s => e.msg.includes(s)));
+    document.getElementById('sys-table').innerHTML = filteredSys.map(e => {
+      const pill = e.level === 'Message'
+        ? '<span class="pill pill-warn">MSG</span>'
+        : '<span class="pill pill-blue">INFO</span>';
+      return `<tr>
+        <td class="ts">${fmtTs(e.ts)}</td>
+        <td>${pill}</td>
+        <td>${e.station}</td>
+        <td style="font-family:var(--mono);font-size:0.76rem;color:var(--gray-600)">${e.msg}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" style="color:var(--gray-400);padding:14px 12px">No system events</td></tr>';
+
+
+    // ── Daily summary: midnight-to-midnight per station/group ─────────────────
+    renderDailySummary(groups, result.cycleMap, result.pointFailMap, result.pointGroups);
+    document.getElementById('results').classList.add('on');
+  }
+
+
+  // ── Daily summary ────────────────────────────────────────────────────────────
+
+  // ── Per-point bar chart ────────────────────────────────────────────────────
+  function buildPointChart(pts) {
+    const n = pts.length;
+    if (n === 0) return '';
+    const W = 900, padL = 6, padR = 6, padT = 18, padB = 52;
+    const H = 110;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+    const bw = plotW / n;
+    const gap = Math.max(1, bw * 0.12);
+
+    let bars = '', xlabels = '';
+    for (let i = 0; i < n; i++) {
+      const { pt, p, succ, nCycles } = pts[i];
+      const bh = Math.max(p > 0 ? 2 : 0, (p / 100) * plotH);
+      const x  = padL + i * bw;
+      const y  = padT + plotH - bh;
+      const mx = x + bw / 2;
+      const barCls = p >= 90 ? 'pt-bar-ok' : p >= 70 ? 'pt-bar-warn' : 'pt-bar-lo';
+
+      bars += `<rect class="${barCls}" x="${(x+gap).toFixed(1)}" y="${y.toFixed(1)}"
+        width="${(bw-gap*2).toFixed(1)}" height="${bh.toFixed(1)}" rx="1">
+        <title>${pt}: ${succ}/${nCycles} (${p.toFixed(0)}%)</title>
+      </rect>`;
+
+      // pct label inside bar if tall enough, else above
+      if (bh > 14) {
+        bars += `<text class="pt-pct-lbl" x="${mx.toFixed(1)}" y="${(y + bh/2).toFixed(1)}">${p.toFixed(0)}%</text>`;
+      } else if (p > 0) {
+        bars += `<text class="pt-pct-lbl-top" x="${mx.toFixed(1)}" y="${(y - 3).toFixed(1)}">${p.toFixed(0)}%</text>`;
+      }
+
+      // X label — rotated 45°
+      xlabels += `<text class="pt-axis-lbl rotated"
+        transform="translate(${mx.toFixed(1)},${(padT + plotH + 6).toFixed(1)}) rotate(-40)"
+        >${pt}</text>`;
+    }
+
+    // 100% line
+    const y100 = padT;
+    const gridLines = `<line class="pt-grid" x1="${padL}" y1="${y100}" x2="${W-padR}" y2="${y100}" stroke-dasharray="3,3"/>
+      <text class="pt-pct-lbl-top" x="${padL-2}" y="${y100+3}" text-anchor="end">100%</text>`;
+
+    return `<div class="pt-chart-wrap">
+      <div class="pt-chart-title">Point success rate (${pts[0].nCycles} cycles)</div>
+      <svg class="pt-chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+        ${gridLines}${bars}${xlabels}
+      </svg>
+    </div>`;
+  }
+
+  function renderDailySummary(groups, cycleMap, pointFailMap, pointGroups) {
+    // Group by calendar day (local midnight), then station+group
+    const byDay = {}; // day -> { stationGroup -> {measured,total,cycles} }
+
+    for (const g of groups) {
+      const d = new Date(g.ts);
+      const day = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (!byDay[day]) byDay[day] = {};
+      const key = `${g.station}|||${g.groupName}`;
+      if (!byDay[day][key]) byDay[day][key] = { station: g.station, group: g.groupName, measured: 0, total: 0, cycles: 0 };
+      byDay[day][key].measured += g.measured;
+      byDay[day][key].total    += g.total;
+      byDay[day][key].cycles   += 1;
+    }
+
+    const days = Object.keys(byDay).sort();
+    const container = document.getElementById('daily-summary');
+    container.innerHTML = '';
+
+    for (const day of days) {
+      const entries = Object.values(byDay[day]).sort((a,b) => a.station.localeCompare(b.station) || a.group.localeCompare(b.group));
+
+      // Overall day average
+      const totM = entries.reduce((s,e) => s + e.measured, 0);
+      const totT = entries.reduce((s,e) => s + e.total, 0);
+      const dayAvg = totT > 0 ? (totM / totT * 100) : 0;
+      const dayAvgCls = dayAvg >= 90 ? 'hi' : dayAvg >= 70 ? 'md' : 'lo';
+
+      // Format display date
+      const [yr,mo,dd] = day.split('-');
+      const displayDate = new Date(+yr,+mo-1,+dd).toLocaleDateString('en-SE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+      const cells = entries.map(e => {
+        const pct = e.total > 0 ? (e.measured / e.total * 100) : 0;
+        const cls = pct >= 90 ? 'hi' : pct >= 70 ? 'md' : 'lo';
+        const interval = e.cycles > 1 ? Math.round(1440 / e.cycles) : null;
+        const intStr = interval ? `every ~${interval} min · ${e.cycles} cycles` : `${e.cycles} cycle`;
+
+        // Build per-point success data for this day/station/group
+        const pgKey = e.station + '|||' + e.group;
+        const ck    = day + '|||' + e.station + '|||' + e.group;
+        const nCycles = cycleMap[ck] || e.cycles;
+        // Use hardcoded point list if available, fall back to dynamically discovered points
+        const hardcoded = POINT_CONFIG[pgKey];
+        const pts = hardcoded ? [...hardcoded] : (pointGroups[pgKey] ? [...pointGroups[pgKey]].sort() : []);
+        const ptData = pts.map(pt => {
+          const pfKey = day + '|||' + e.station + '|||' + pt + '|||' + e.group;
+          const fails = pointFailMap[pfKey] || 0;
+          const succ  = Math.max(0, nCycles - fails);
+          const p     = nCycles > 0 ? succ / nCycles * 100 : 100;
+          return { pt, succ, nCycles, p };
+        });
+
+        const chart = ptData.length > 0 ? buildPointChart(ptData) : '';
+
+        return `<div class="daily-cell" style="grid-column: 1 / -1">
+          <div class="dc-header">
+            <span class="dc-station">${e.station}</span>
+            <span class="dc-group" title="${e.group}">${e.group}</span>
+          </div>
+          <div class="dc-row">
+            <div class="dc-track"><div class="dc-fill ${cls}" style="width:${Math.min(pct,100).toFixed(1)}%"></div></div>
+            <span class="dc-pct ${cls}">${pct.toFixed(1)}%</span>
+            <span style="font-family:var(--mono);font-size:0.68rem;color:var(--gray-400);margin-left:8px">${e.measured} / ${e.total} pts · ${intStr}</span>
+          </div>
+          ${chart}
+        </div>`;
+      }).join('');
+
+      container.innerHTML += `<div class="day-section">
+        <div class="day-label">
+          ${displayDate}
+          <span class="day-avg">Day avg: <strong class="${dayAvgCls}">${dayAvg.toFixed(1)}%</strong></span>
+        </div>
+        <div class="daily-grid">${cells}</div>
+      </div>`;
+    }
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+  function fmtDay(ts) {
+    const d = new Date(ts);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function fmtTs(ts) {
+    if (!ts && ts !== 0) return '—';
+    const d = new Date(ts);
+    const p = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+
+  function reasonPill(r) {
+    if (r.includes('not found'))    return '<span class="pill pill-red">NOT FOUND</span>';
+    if (r.includes('Compensator'))  return '<span class="pill pill-warn">COMPENSATOR</span>';
+    if (r.includes('blunder'))      return '<span class="pill pill-warn">BLUNDER</span>';
+    if (r.includes('Positioning'))  return '<span class="pill pill-red">POSITION FAIL</span>';
+    if (r.includes('Not enough'))   return '<span class="pill pill-warn">REF GROUP</span>';
+    return '<span class="pill pill-gray">OTHER</span>';
+  }
+
+  // ── Export ──────────────────────────────────────────────────────────────────
+  function exportCSV() {
+    if (!result) return;
+    const hdr = ['Timestamp','Station','Point','Reason'];
+    const rows = [hdr, ...result.failures.map(f => [fmtTs(f.ts), f.station, f.point, f.reason])];
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    dl(csv, 'GeoMoS_Failures.csv', 'text/csv');
+  }
+
+  function exportTXT() {
+    if (!result) return;
+    const { failures, groups, pushEvents, queryEvents, sysEvents, minTs, maxTs, filename } = result;
+    let o = '='.repeat(70)+'\n';
+    o += 'GeoMoS Event Log Analyzer — Full Report\n';
+    o += `Source file : ${filename}\n`;
+    o += `Generated   : ${fmtTs(Date.now())}\n`;
+    o += `Log period  : ${fmtTs(minTs)}  →  ${fmtTs(maxTs)}\n`;
+    o += '='.repeat(70)+'\n\n';
+
+    o += `MEASUREMENT FAILURES (${failures.length})\n${'─'.repeat(70)}\n`;
+    o += `${'Timestamp'.padEnd(22)} ${'Station'.padEnd(12)} ${'Point'.padEnd(20)} Reason\n`;
+    o += `${'─'.repeat(70)}\n`;
+    for (const f of failures) {
+      o += `${fmtTs(f.ts).padEnd(22)} ${f.station.padEnd(12)} ${f.point.padEnd(20)} ${f.reason}\n`;
+    }
+
+    o += `\nGROUP MEASUREMENTS (${groups.length})\n${'─'.repeat(70)}\n`;
+    o += `${'Timestamp'.padEnd(22)} ${'Station'.padEnd(12)} ${'Group'.padEnd(28)} ${'M'.padStart(4)} ${'T'.padStart(4)} ${'%'.padStart(7)}\n`;
+    o += `${'─'.repeat(70)}\n`;
+    for (const g of groups) {
+      o += `${fmtTs(g.ts).padEnd(22)} ${g.station.padEnd(12)} ${g.groupName.padEnd(28)} ${String(g.measured).padStart(4)} ${String(g.total).padStart(4)} ${(g.pct.toFixed(1)+'%').padStart(7)}\n`;
+    }
+
+    o += `\nGEOMOS PUSH EVENTS (${pushEvents.length})\n${'─'.repeat(70)}\n`;
+    for (const e of pushEvents) {
+      o += `${fmtTs(e.ts)}  ${e.desc}\n`;
+    }
+
+    o += `\nQUERY TO FILE EVENTS (${queryEvents.length})\n${'─'.repeat(70)}\n`;
+    for (const e of queryEvents) {
+      o += `${fmtTs(e.ts)}  [${e.ok ? 'OK' : 'FAIL'}]  ${e.desc}\n`;
+    }
+
+    dl(o, 'GeoMoS_EventLog_Report.txt', 'text/plain');
+  }
+
+  function dl(content, filename, mime) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], {type: mime}));
+    a.download = filename;
+    a.click();
+  }
+</script>
+</body>
+</html>
