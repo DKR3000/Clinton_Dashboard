@@ -344,8 +344,8 @@
 
   <header class="top">
     <div>
-      <h1>Inclinometer splice: RST → Geosense</h1>
-      <div class="sub">Load a reference survey and a current survey (RST or Geosense raw export, either order) to compute mean deviation, absolute position, and displacement since baseline.</div>
+      <h1>CLINTON - Inclinometer splice: RST - Geosense - Soil</h1>
+      <div class="sub">Load a reference survey and a current survey (RST, Geosense or Soil raw export, either order) to compute mean deviation, absolute position, and displacement since baseline.</div>
     </div>
   </header>
 
@@ -353,7 +353,7 @@
     <div class="card ref">
       <div class="role">REFERENCE / BASELINE</div>
       <h2>Reference survey</h2>
-      <p class="hint">The earlier survey to compare against — e.g. the last RST reading before switching instruments.</p>
+      <p class="hint">The reference survey to compare against — e.g. the last RST reading before switching instruments.</p>
       <label class="drop" id="drop-ref">
         <input type="file" id="file-ref" accept=".csv,.txt">
         <div id="drop-ref-text">Click to choose a file, or drag one here<br><span class="filename" id="ref-filename"></span></div>
@@ -364,7 +364,7 @@
     <div class="card cur">
       <div class="role">CURRENT</div>
       <h2>Current survey</h2>
-      <p class="hint">The new reading — e.g. the first Geosense reading on the same casing.</p>
+      <p class="hint">The new reading — e.g. the the latest survey.</p>
       <label class="drop" id="drop-cur">
         <input type="file" id="file-cur" accept=".csv,.txt">
         <div id="drop-cur-text">Click to choose a file, or drag one here<br><span class="filename" id="cur-filename"></span></div>
@@ -376,7 +376,7 @@
   <div class="actions">
     <button class="primary" id="btn-calc" disabled>Calculate</button>
     <button class="ghost" id="btn-download" disabled>Download CSV</button>
-    <button class="ghost" id="btn-download-agd" disabled>Export AGD CSV</button>
+    <button class="ghost" id="btn-download-agd" disabled>Export GEOvis AGD CSV</button>
     <span class="status" id="status"></span>
   </div>
 
@@ -618,7 +618,7 @@
       if (err) { metaEl.innerHTML = '<span class="badge err">Read error</span>'; return; }
       var fmtType = detectFormat(text);
       if (!fmtType) {
-        metaEl.innerHTML = '<span class="badge err">Format not recognised</span><div class="note">Expected an RST or Geosense raw export.</div>';
+        metaEl.innerHTML = '<span class="badge err">Format not recognised</span><div class="note">Please check that the file is an RST, Geosense or Soil raw data file.</div>';
         state[role] = null;
         updateCalcButton();
         return;
