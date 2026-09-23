@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inclinometer Splice — RST / Geosense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F5F1;
+    --panel: #FFFFFF;
+    --panel-border: #D8DBD3;
+    --ink: #1D2321;
+    --ink-soft: #5B645E;
+    --accent-cur: #1D6F8C;
+    --accent-cur-soft: #E4EEF1;
+    --accent-ref: #B8722A;
+    --accent-ref-soft: #F5E9DA;
+    --grid: #E2E4DC;
+    --danger: #A8402A;
+    --danger-soft: #F6E4DE;
+    --ok: #3C7A5A;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171A;
+      --panel: #1B1F23;
+      --panel-border: #2B3136;
+      --ink: #E7EAE6;
+      --ink-soft: #9AA39C;
+      --accent-cur: #6FC2E0;
+      --accent-cur-soft: #1E2D33;
+      --accent-ref: #E0A857;
+      --accent-ref-soft: #332A1B;
+      --grid: #262B2F;
+      --danger: #E37B63;
+      --danger-soft: #3A2420;
+      --ok: #7BC29B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171A;
+    --panel: #1B1F23;
+    --panel-border: #2B3136;
+    --ink: #E7EAE6;
+    --ink-soft: #9AA39C;
+    --accent-cur: #6FC2E0;
+    --accent-cur-soft: #1E2D33;
+    --accent-ref: #E0A857;
+    --accent-ref-soft: #332A1B;
+    --grid: #262B2F;
+    --danger: #E37B63;
+    --danger-soft: #3A2420;
+    --ok: #7BC29B;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+  header.top h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  header.top .sub {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    max-width: 46ch;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 760px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .card > .role {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .card.ref { border-top: 3px solid var(--accent-ref); }
+  .card.cur { border-top: 3px solid var(--accent-cur); }
+  .card h2 {
+    font-size: 1.02rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .card p.hint {
+    color: var(--ink-soft);
+    font-size: 0.86rem;
+    margin: 0 0 14px;
+  }
+  .drop {
+    border: 1.5px dashed var(--panel-border);
+    border-radius: 8px;
+    padding: 40px 16px;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .drop:hover, .drop.drag { border-color: var(--accent-cur); background: var(--accent-cur-soft); }
+  .drop input { display: none; }
+  .drop .filename {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--ink);
+    font-size: 0.84rem;
+    word-break: break-all;
+  }
+  .meta {
+    margin-top: 14px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+  }
+  .meta b { color: var(--ink); font-weight: 500; }
+  .badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-top: 10px;
+  }
+  .badge.rst { background: #EFE6D2; color: #6B5320; }
+  .badge.geosense { background: #DCEAE6; color: #1E5B4C; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .badge.rst { background: #3A331E; color: #E3C77E; }
+    :root:not([data-theme="light"]) .badge.geosense { background: #1B332C; color: #8FD8C4; }
+  }
+  :root[data-theme="dark"] .badge.rst { background: #3A331E; color: #E3C77E; }
+  :root[data-theme="dark"] .badge.geosense { background: #1B332C; color: #8FD8C4; }
+  .badge.err { background: var(--danger-soft); color: var(--danger); }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  button.primary {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 7px;
+    padding: 11px 20px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button.primary:disabled { opacity: 0.35; cursor: not-allowed; }
+  button.ghost {
+    background: transparent;
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    border-radius: 7px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button.ghost:disabled { opacity: 0.35; cursor: not-allowed; }
+  .status {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .status.err { color: var(--danger); }
+
+  #results { display: none; }
+  #results.show { display: block; }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .tab {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--ink-soft);
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .tab.active { color: var(--ink); border-color: var(--ink); font-weight: 600; }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 18px; height: 3px; border-radius: 2px; display: inline-block; }
+
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 760px) { .charts { grid-template-columns: 1fr; } }
+  .chart-box {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .chart-box h3 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+  svg.plot { width: 100%; height: auto; display: block; overflow: visible; }
+  svg.plot text { font-family: "IBM Plex Mono", monospace; fill: var(--ink-soft); }
+  svg.plot .gridline { stroke: var(--grid); stroke-width: 1; }
+  svg.plot .zero { stroke: var(--ink-soft); stroke-width: 1; }
+  svg.plot .line-ref { fill: none; stroke: var(--accent-ref); stroke-width: 2; }
+  svg.plot .line-cur { fill: none; stroke: var(--accent-cur); stroke-width: 2; }
+  svg.plot .pt-ref { fill: var(--accent-ref); }
+  svg.plot .pt-cur { fill: var(--accent-cur); }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table.data caption {
+    text-align: left;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 12px 14px;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  table.data th, table.data td {
+    padding: 7px 10px;
+    text-align: right;
+    border-bottom: 1px solid var(--grid);
+    white-space: nowrap;
+  }
+  table.data th {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    text-transform: none;
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+  }
+  table.data th.grp-ref { color: var(--accent-ref); }
+  table.data th.grp-cur { color: var(--accent-cur); }
+  table.data td:first-child, table.data th:first-child { text-align: left; }
+  table.data tbody tr:hover { background: var(--grid); }
+  .table-scroll { overflow-x: auto; border-radius: 10px; }
+  .empty-cell { color: var(--ink-soft); opacity: 0.5; }
+
+  .note {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+  .formula-note {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-top: 26px;
+  }
+  .formula-note code {
+    font-family: "IBM Plex Mono", monospace;
+    background: var(--grid);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Inclinometer splice: RST → Geosense</h1>
+      <div class="sub">Load a reference survey and a current survey (RST or Geosense raw export, either order) to compute mean deviation, absolute position, and displacement since baseline.</div>
+    </div>
+  </header>
+
+  <div class="grid-2">
+    <div class="card ref">
+      <div class="role">REFERENCE / BASELINE</div>
+      <h2>Reference survey</h2>
+      <p class="hint">The earlier survey to compare against — e.g. the last RST reading before switching instruments.</p>
+      <label class="drop" id="drop-ref">
+        <input type="file" id="file-ref" accept=".csv,.txt">
+        <div id="drop-ref-text">Click to choose a file, or drag one here<br><span class="filename" id="ref-filename"></span></div>
+      </label>
+      <div id="ref-meta"></div>
+    </div>
+
+    <div class="card cur">
+      <div class="role">CURRENT</div>
+      <h2>Current survey</h2>
+      <p class="hint">The new reading — e.g. the first Geosense reading on the same casing.</p>
+      <label class="drop" id="drop-cur">
+        <input type="file" id="file-cur" accept=".csv,.txt">
+        <div id="drop-cur-text">Click to choose a file, or drag one here<br><span class="filename" id="cur-filename"></span></div>
+      </label>
+      <div id="cur-meta"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="btn-calc" disabled>Calculate</button>
+    <button class="ghost" id="btn-download" disabled>Download CSV</button>
+    <button class="ghost" id="btn-download-agd" disabled>Export AGD CSV</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div id="results">
+    <div class="tabs">
+      <button class="tab active" data-tab="absolute">Absolute position</button>
+      <button class="tab" data-tab="displacement">Displacement vs reference</button>
+    </div>
+
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--accent-ref)"></i> Reference</span>
+      <span><i class="swatch" style="background:var(--accent-cur)"></i> Current</span>
+    </div>
+
+    <div class="charts" id="charts"></div>
+
+    <div class="table-scroll">
+      <table class="data" id="data-table"></table>
+    </div>
+  </div>
+
+  <div class="formula-note" id="formula-note"></div>
+</div>
+
+<script>
+(function(){
+
+  // ---------- number / text helpers ----------
+  function parseNum(raw) {
+    if (raw === undefined || raw === null) return null;
+    var s = String(raw).trim();
+    if (s === '' || /^null$/i.test(s)) return null;
+    var hasComma = s.indexOf(',') !== -1;
+    var hasDot = s.indexOf('.') !== -1;
+    if (hasComma && !hasDot) s = s.replace(',', '.');
+    else if (hasComma && hasDot) s = s.replace(/,/g, '');
+    var n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+
+  function splitLine(line, delim) {
+    return line.split(delim).map(function(x){ return x.trim(); });
+  }
+
+  function detectDelimiter(sampleLine) {
+    var semi = (sampleLine.match(/;/g) || []).length;
+    var comma = (sampleLine.match(/,/g) || []).length;
+    return semi > comma ? ';' : ',';
+  }
+
+  // ---------- format detection ----------
+  function detectFormat(text) {
+    var head = text.slice(0, 2000);
+    if (/File Version/i.test(head) && /Face A\+/i.test(text)) return 'rst';
+    if (/Site Name\s*:/i.test(head) || /DEPTH_METRES/i.test(head)) return 'geosense';
+    if (/Face A\+/i.test(text)) return 'rst';
+    return null;
+  }
+
+  // ---------- RST parser ----------
+  function parseRST(text) {
+    var lines = text.split(/\r?\n/);
+    var delim = detectDelimiter(lines.find(function(l){return l.indexOf(',')!==-1 || l.indexOf(';')!==-1;}) || ',');
+    var meta = {};
+    var interval = null;
+    var headerIdx = -1;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (!line.trim()) continue;
+      var parts = splitLine(line, delim);
+      var key = (parts[0] || '').trim();
+      if (/^Site$/i.test(key)) meta.site = parts[1];
+      if (/^Borehole$/i.test(key)) meta.borehole = parts[1];
+      if (/^Reading Date/i.test(key)) meta.date = parts.slice(1).join(' ');
+      if (/^Interval$/i.test(key)) interval = parseNum(parts[1]);
+      if (/^Depth$/i.test(key) && /Face A\+/i.test(parts[1] || '')) { headerIdx = i; break; }
+    }
+    if (headerIdx === -1) throw new Error('Could not find the "Depth, Face A+, Face A-, Face B+, Face B-" table header in this RST file.');
+    var rows = [];
+    for (var j = headerIdx + 1; j < lines.length; j++) {
+      var l = lines[j];
+      if (!l.trim()) { if (rows.length) break; else continue; } // skip blank line(s) before data starts
+      var p = splitLine(l, delim);
+      var depth = parseNum(p[0]);
+      if (depth === null) { if (rows.length) break; else continue; }
+      rows.push({
+        depth: Math.abs(depth),
+        aPos: parseNum(p[1]), aNeg: parseNum(p[2]),
+        bPos: parseNum(p[3]), bNeg: parseNum(p[4])
+      });
+    }
+    if (!interval) interval = 0.5;
+    return { format: 'rst', meta: meta, interval: interval, rawRows: rows };
+  }
+
+  // ---------- Geosense parser ----------
+  function parseGeosense(text) {
+    var lines = text.split(/\r?\n/);
+    var meta = {};
+    var interval = null;
+    var headerIdx = -1;
+    var delim = ',';
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (!line.trim()) continue;
+      if (/^ID\s*,/i.test(line) || /^ID\s*;/i.test(line)) { headerIdx = i; delim = detectDelimiter(line); break; }
+      var m = line.match(/^([^:]+):\s*(.*)$/);
+      if (m) {
+        var key = m[1].trim();
+        var val = m[2].trim();
+        if (/^Site Name$/i.test(key)) meta.site = val;
+        if (/^Borehole Name$/i.test(key)) meta.borehole = val;
+        if (/^Survey Date$/i.test(key)) meta.date = val;
+        if (/^Interval$/i.test(key)) interval = parseNum(val.replace(/[^0-9.,]/g, ''));
+      }
+    }
+    if (headerIdx === -1) throw new Error('Could not find the "ID, DEPTH_METRES, ..." header row in this Geosense file.');
+    var header = splitLine(lines[headerIdx], delim).map(function(h){ return h.trim().toUpperCase(); });
+    function col(name) { return header.indexOf(name); }
+    var idxDepth = col('DEPTH_METRES');
+    var idxAPosSinx = col('A_POSITIVE_SINX'), idxBPosSinx = col('B_POSITIVE_SINX');
+    var idxANegSinx = col('A_NEGATIVE_SINX'), idxBNegSinx = col('B_NEGATIVE_SINX');
+    var idxAPosMM = col('A_POSITIVE_MM'), idxBPosMM = col('B_POSITIVE_MM');
+    var idxANegMM = col('A_NEGATIVE_MM'), idxBNegMM = col('B_NEGATIVE_MM');
+    if (idxDepth === -1) throw new Error('Geosense header is missing DEPTH_METRES.');
+    var rows = [];
+    for (var j = headerIdx + 1; j < lines.length; j++) {
+      var l = lines[j];
+      if (!l.trim()) continue;
+      var p = splitLine(l, delim);
+      var depth = parseNum(p[idxDepth]);
+      if (depth === null) continue;
+      rows.push({
+        depth: Math.abs(depth),
+        aPosSinx: idxAPosSinx > -1 ? parseNum(p[idxAPosSinx]) : null,
+        bPosSinx: idxBPosSinx > -1 ? parseNum(p[idxBPosSinx]) : null,
+        aNegSinx: idxANegSinx > -1 ? parseNum(p[idxANegSinx]) : null,
+        bNegSinx: idxBNegSinx > -1 ? parseNum(p[idxBNegSinx]) : null,
+        aPosMMgiven: idxAPosMM > -1 ? parseNum(p[idxAPosMM]) : null,
+        bPosMMgiven: idxBPosMM > -1 ? parseNum(p[idxBPosMM]) : null,
+        aNegMMgiven: idxANegMM > -1 ? parseNum(p[idxANegMM]) : null,
+        bNegMMgiven: idxBNegMM > -1 ? parseNum(p[idxBNegMM]) : null
+      });
+    }
+    if (!interval) interval = 0.5;
+    return { format: 'geosense', meta: meta, interval: interval, rawRows: rows };
+  }
+
+  // ---------- computation ----------
+  // Produces, per depth: meanDevA, meanDevB (mm), then integrates bottom-up to absA, absB.
+  function computeSeries(parsed) {
+    var interval = parsed.interval;
+    var gaugeMM = interval * 1000;
+    var stations = [];
+
+    if (parsed.format === 'rst') {
+      parsed.rawRows.forEach(function(r) {
+        if (r.aPos === null || r.aNeg === null) return;
+        var meanDevA = ((r.aPos - r.aNeg) / 2) * 1000;
+        var meanDevB = (r.bPos !== null && r.bNeg !== null) ? ((r.bPos - r.bNeg) / 2) * 1000 : null;
+        stations.push({ depth: r.depth, meanDevA: meanDevA, meanDevB: meanDevB });
+      });
+    } else {
+      parsed.rawRows.forEach(function(r) {
+        var aPosMM = r.aPosMMgiven !== null ? r.aPosMMgiven : (r.aPosSinx !== null ? r.aPosSinx * gaugeMM : null);
+        var aNegMM = r.aNegMMgiven !== null ? r.aNegMMgiven : (r.aNegSinx !== null ? r.aNegSinx * gaugeMM : null);
+        var bPosMM = r.bPosMMgiven !== null ? r.bPosMMgiven : (r.bPosSinx !== null ? r.bPosSinx * gaugeMM : null);
+        var bNegMM = r.bNegMMgiven !== null ? r.bNegMMgiven : (r.bNegSinx !== null ? r.bNegSinx * gaugeMM : null);
+        var meanDevA = (aPosMM !== null && aNegMM !== null) ? (aPosMM - aNegMM) / 2 : (aPosMM !== null ? aPosMM : null);
+        var meanDevB = (bPosMM !== null && bNegMM !== null) ? (bPosMM - bNegMM) / 2 : (bPosMM !== null ? bPosMM : null);
+        stations.push({ depth: r.depth, meanDevA: meanDevA, meanDevB: meanDevB });
+      });
+    }
+
+    // sort deepest first for bottom-up integration
+    stations.sort(function(a, b) { return b.depth - a.depth; });
+    var runA = 0, runB = 0;
+    var haveA = false, haveB = false;
+    stations.forEach(function(s) {
+      if (s.meanDevA !== null) { runA += s.meanDevA; haveA = true; }
+      s.absA = haveA ? runA : null;
+      if (s.meanDevB !== null) { runB += s.meanDevB; haveB = true; }
+      s.absB = haveB ? runB : null;
+    });
+    // return sorted shallow-to-deep for display
+    stations.sort(function(a, b) { return a.depth - b.depth; });
+    return stations;
+  }
+
+  // ---------- merge two computed series by depth ----------
+  function mergeSeries(ref, cur) {
+    var depths = {};
+    (ref || []).forEach(function(s) { depths[s.depth.toFixed(3)] = true; });
+    (cur || []).forEach(function(s) { depths[s.depth.toFixed(3)] = true; });
+    var keys = Object.keys(depths).map(parseFloat).sort(function(a, b) { return a - b; });
+    var refByDepth = {}, curByDepth = {};
+    (ref || []).forEach(function(s) { refByDepth[s.depth.toFixed(3)] = s; });
+    (cur || []).forEach(function(s) { curByDepth[s.depth.toFixed(3)] = s; });
+
+    return keys.map(function(d) {
+      var k = d.toFixed(3);
+      var r = refByDepth[k], c = curByDepth[k];
+      var row = {
+        depth: d,
+        refMeanA: r ? r.meanDevA : null, refMeanB: r ? r.meanDevB : null,
+        refAbsA: r ? r.absA : null, refAbsB: r ? r.absB : null,
+        curMeanA: c ? c.meanDevA : null, curMeanB: c ? c.meanDevB : null,
+        curAbsA: c ? c.absA : null, curAbsB: c ? c.absB : null
+      };
+      row.incA = (r && c && r.meanDevA !== null && c.meanDevA !== null) ? c.meanDevA - r.meanDevA : null;
+      row.incB = (r && c && r.meanDevB !== null && c.meanDevB !== null) ? c.meanDevB - r.meanDevB : null;
+      row.cumA = (r && c && r.absA !== null && c.absA !== null) ? c.absA - r.absA : null;
+      row.cumB = (r && c && r.absB !== null && c.absB !== null) ? c.absB - r.absB : null;
+      return row;
+    });
+  }
+
+  // ---------- state ----------
+  var state = { ref: null, cur: null, merged: null, activeTab: 'absolute' };
+
+  function fmt(n, d) {
+    if (n === null || n === undefined || isNaN(n)) return null;
+    return n.toFixed(d === undefined ? 3 : d);
+  }
+
+  function readFile(file, cb) {
+    var reader = new FileReader();
+    reader.onload = function(e) { cb(null, e.target.result); };
+    reader.onerror = function() { cb(new Error('Could not read file.')); };
+    reader.readAsText(file);
+  }
+
+  function handleFile(role, file) {
+    var filenameEl = document.getElementById(role + '-filename');
+    var metaEl = document.getElementById(role + '-meta');
+    filenameEl.textContent = file.name;
+    metaEl.innerHTML = '';
+    readFile(file, function(err, text) {
+      if (err) { metaEl.innerHTML = '<span class="badge err">Read error</span>'; return; }
+      var fmtType = detectFormat(text);
+      if (!fmtType) {
+        metaEl.innerHTML = '<span class="badge err">Format not recognised</span><div class="note">Expected an RST or Geosense raw export.</div>';
+        state[role] = null;
+        updateCalcButton();
+        return;
+      }
+      try {
+        var parsed = fmtType === 'rst' ? parseRST(text) : parseGeosense(text);
+        var computed = computeSeries(parsed);
+        state[role] = { parsed: parsed, computed: computed, filename: file.name };
+        var badgeClass = fmtType === 'rst' ? 'rst' : 'geosense';
+        var badgeLabel = fmtType === 'rst' ? 'RST' : 'Geosense';
+        var metaHtml = '<span class="badge ' + badgeClass + '">' + badgeLabel + '</span>';
+        metaHtml += '<div class="meta">';
+        if (parsed.meta.site) metaHtml += '<span>Site</span><b>' + escapeHtml(parsed.meta.site) + '</b>';
+        if (parsed.meta.borehole) metaHtml += '<span>Borehole</span><b>' + escapeHtml(parsed.meta.borehole) + '</b>';
+        if (parsed.meta.date) metaHtml += '<span>Date</span><b>' + escapeHtml(parsed.meta.date) + '</b>';
+        metaHtml += '<span>Interval</span><b>' + parsed.interval + ' m</b>';
+        metaHtml += '<span>Stations</span><b>' + computed.length + '</b>';
+        metaHtml += '</div>';
+        metaEl.innerHTML = metaHtml;
+      } catch (e) {
+        metaEl.innerHTML = '<span class="badge err">' + escapeHtml(e.message) + '</span>';
+        state[role] = null;
+      }
+      updateCalcButton();
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function updateCalcButton() {
+    document.getElementById('btn-calc').disabled = !(state.ref || state.cur);
+  }
+
+  ['ref', 'cur'].forEach(function(role) {
+    var input = document.getElementById('file-' + role);
+    var drop = document.getElementById('drop-' + role);
+    input.addEventListener('change', function() {
+      if (input.files && input.files[0]) handleFile(role, input.files[0]);
+    });
+    drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('drag'); });
+    drop.addEventListener('dragleave', function() { drop.classList.remove('drag'); });
+    drop.addEventListener('drop', function(e) {
+      e.preventDefault();
+      drop.classList.remove('drag');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(role, e.dataTransfer.files[0]);
+    });
+  });
+
+  document.getElementById('btn-calc').addEventListener('click', function() {
+    var refComputed = state.ref ? state.ref.computed : [];
+    var curComputed = state.cur ? state.cur.computed : [];
+    state.merged = mergeSeries(refComputed, curComputed);
+    renderResults();
+    document.getElementById('results').classList.add('show');
+    document.getElementById('btn-download').disabled = false;
+    document.getElementById('btn-download-agd').disabled = !(state.ref && state.cur);
+    var statusEl = document.getElementById('status');
+    if (state.ref && state.cur) {
+      statusEl.textContent = state.merged.length + ' depth stations merged.';
+      statusEl.className = 'status';
+    } else {
+      statusEl.textContent = 'Only one survey loaded — showing its profile without displacement.';
+      statusEl.className = 'status';
+    }
+  });
+
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      state.activeTab = tab.dataset.tab;
+      renderResults();
+    });
+  });
+
+  // ---------- SVG chart ----------
+  function drawChart(rows, keyA, keyB, axisLabel, unitLabel) {
+    var w = 320, h = 420;
+    var padL = 46, padR = 14, padT = 10, padB = 30;
+    var plotW = w - padL - padR, plotH = h - padT - padB;
+
+    var vals = [];
+    rows.forEach(function(r) {
+      if (r[keyA + 'ref'] !== null && r[keyA + 'ref'] !== undefined) vals.push(r[keyA + 'ref']);
+      if (r[keyA + 'cur'] !== null && r[keyA + 'cur'] !== undefined) vals.push(r[keyA + 'cur']);
+    });
+    var maxAbs = Math.max(10, vals.reduce(function(m, v) { return Math.max(m, Math.abs(v)); }, 0));
+    maxAbs = Math.ceil(maxAbs / 5) * 5;
+
+    var depths = rows.map(function(r) { return r.depth; });
+    var minD = 0, maxD = Math.max.apply(null, depths.concat([1]));
+
+    function x(v) { return padL + ((v + maxAbs) / (2 * maxAbs)) * plotW; }
+    function y(d) { return padT + ((d - minD) / (maxD - minD || 1)) * plotH; }
+
+    var svg = '<svg class="plot" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+
+    // gridlines (vertical, value)
+    var gridSteps = 4;
+    for (var i = -gridSteps; i <= gridSteps; i++) {
+      var gv = (maxAbs / gridSteps) * i;
+      var gx = x(gv);
+      svg += '<line class="gridline" x1="' + gx + '" y1="' + padT + '" x2="' + gx + '" y2="' + (padT + plotH) + '"/>';
+      svg += '<text x="' + gx + '" y="' + (padT + plotH + 16) + '" font-size="9" text-anchor="middle">' + gv.toFixed(0) + '</text>';
+    }
+    // zero line
+    svg += '<line class="zero" x1="' + x(0) + '" y1="' + padT + '" x2="' + x(0) + '" y2="' + (padT + plotH) + '"/>';
+
+    // depth gridlines (horizontal)
+    var dStep = Math.ceil(maxD / 6 / 0.5) * 0.5 || 0.5;
+    for (var dd = 0; dd <= maxD + 0.001; dd += dStep) {
+      var gy = y(dd);
+      svg += '<line class="gridline" x1="' + padL + '" y1="' + gy + '" x2="' + (padL + plotW) + '" y2="' + gy + '"/>';
+      svg += '<text x="' + (padL - 6) + '" y="' + (gy + 3) + '" font-size="9" text-anchor="end">' + dd.toFixed(1) + '</text>';
+    }
+
+    function buildPath(field) {
+      var pts = rows.filter(function(r) { return r[field] !== null && r[field] !== undefined; })
+                    .map(function(r) { return { x: x(r[field]), y: y(r.depth) }; });
+      if (!pts.length) return null;
+      var d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+      for (var i = 1; i < pts.length; i++) d += ' L ' + pts[i].x.toFixed(1) + ' ' + pts[i].y.toFixed(1);
+      return { d: d, pts: pts };
+    }
+
+    var refPath = buildPath(keyA + 'ref');
+    var curPath = buildPath(keyA + 'cur');
+    if (refPath) {
+      svg += '<path class="line-ref" d="' + refPath.d + '"/>';
+      refPath.pts.forEach(function(p) { svg += '<circle class="pt-ref" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
+    }
+    if (curPath) {
+      svg += '<path class="line-cur" d="' + curPath.d + '"/>';
+      curPath.pts.forEach(function(p) { svg += '<circle class="pt-cur" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
+    }
+
+    svg += '<text x="' + (padL + plotW / 2) + '" y="' + (h - 4) + '" font-size="9" text-anchor="middle">' + unitLabel + '</text>';
+    svg += '</svg>';
+    return svg;
+  }
+
+  function renderResults() {
+    if (!state.merged) return;
+    var rows = state.merged;
+    var isAbs = state.activeTab === 'absolute';
+
+    var chartRowsA = rows.map(function(r) {
+      var o = { depth: r.depth };
+      o['Aref'] = isAbs ? r.refAbsA : r.cumA;
+      o['Acur'] = isAbs ? r.curAbsA : r.cumA;
+      return o;
+    });
+    // For displacement tab there's only one series (cur vs ref delta) — draw it as "current"
+    var chartsHtml = '';
+    chartsHtml += '<div class="chart-box"><h3>Axis A</h3>' +
+      drawChart(rows.map(function(r){return {depth:r.depth, Aref:isAbs?r.refAbsA:r.cumA, Acur:isAbs?r.curAbsA:(isAbs?null:r.cumA)};}), 'A', null, 'A', isAbs ? 'mm' : 'mm since reference') +
+      '</div>';
+    chartsHtml += '<div class="chart-box"><h3>Axis B</h3>' +
+      drawChart(rows.map(function(r){return {depth:r.depth, Aref:isAbs?r.refAbsB:r.cumB, Acur:isAbs?r.curAbsB:(isAbs?null:r.cumB)};}), 'A', null, 'B', isAbs ? 'mm' : 'mm since reference') +
+      '</div>';
+    document.getElementById('charts').innerHTML = chartsHtml;
+
+    // table
+    var table = document.getElementById('data-table');
+    var caption = isAbs ? 'Mean deviation & absolute position, per depth' : 'Displacement vs reference, per depth';
+    var head = '<caption>' + caption + '</caption><thead><tr>' +
+      '<th>Depth (m)</th>' +
+      '<th class="grp-ref">Ref mean dev A</th><th class="grp-ref">Ref mean dev B</th>' +
+      '<th class="grp-ref">Ref absolute A</th><th class="grp-ref">Ref absolute B</th>' +
+      '<th class="grp-cur">Cur mean dev A</th><th class="grp-cur">Cur mean dev B</th>' +
+      '<th class="grp-cur">Cur absolute A</th><th class="grp-cur">Cur absolute B</th>' +
+      '<th>Incremental A</th><th>Incremental B</th>' +
+      '<th>Cumulative A</th><th>Cumulative B</th>' +
+      '</tr></thead>';
+    var body = '<tbody>';
+    rows.forEach(function(r) {
+      function cell(v) { var s = fmt(v); return s === null ? '<td class="empty-cell">—</td>' : '<td>' + s + '</td>'; }
+      body += '<tr><td>' + r.depth.toFixed(2) + '</td>' +
+        cell(r.refMeanA) + cell(r.refMeanB) + cell(r.refAbsA) + cell(r.refAbsB) +
+        cell(r.curMeanA) + cell(r.curMeanB) + cell(r.curAbsA) + cell(r.curAbsB) +
+        cell(r.incA) + cell(r.incB) + cell(r.cumA) + cell(r.cumB) +
+        '</tr>';
+    });
+    body += '</tbody>';
+    table.innerHTML = head + body;
+
+    document.getElementById('formula-note').innerHTML =
+      'RST: <code>MEAN_DEVIATION = ((Face+ − Face−) / 2) × 1000</code>. ' +
+      'Geosense: <code>MM = SINX × interval(mm)</code>, <code>MEAN_DEVIATION = (POS_MM − NEG_MM) / 2</code>. ' +
+      'Both: <code>ABSOLUTE(depth)</code> is the running sum of mean deviation, integrated from the deepest station upward (bottom of casing = fixed 0). ' +
+      '<code>CUMULATIVE DISPLACEMENT = current absolute − reference absolute</code> at each matching depth.';
+  }
+
+  // ---------- shared file-save helper ----------
+  async function saveTextFile(filename, content, mime) {
+    var statusEl = document.getElementById('status');
+    try {
+      var downloads = (window.claude && typeof window.claude.use === 'function') ? await window.claude.use('downloads') : null;
+      if (downloads) {
+        await downloads.save({ filename: filename, data: content });
+        statusEl.textContent = filename + ' saved.';
+        statusEl.className = 'status';
+        return;
+      }
+    } catch (e) {
+      if (e && e.code === 'declined') { return; }
+      // fall through to plain-link fallback
+    }
+    try {
+      var blob = new Blob([content], { type: mime || 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    } catch (e2) {
+      statusEl.textContent = 'Could not save the file in this view.';
+      statusEl.className = 'status err';
+    }
+  }
+
+  // ---------- CSV download (full comparison table) ----------
+  document.getElementById('btn-download').addEventListener('click', function() {
+    if (!state.merged) return;
+    var header = ['Depth_m','Ref_MeanDev_A_mm','Ref_MeanDev_B_mm','Ref_Absolute_A_mm','Ref_Absolute_B_mm',
+      'Cur_MeanDev_A_mm','Cur_MeanDev_B_mm','Cur_Absolute_A_mm','Cur_Absolute_B_mm',
+      'Incremental_A_mm','Incremental_B_mm','Cumulative_A_mm','Cumulative_B_mm'];
+    var lines = [header.join(',')];
+    state.merged.forEach(function(r) {
+      lines.push([r.depth.toFixed(3), fmt(r.refMeanA), fmt(r.refMeanB), fmt(r.refAbsA), fmt(r.refAbsB),
+        fmt(r.curMeanA), fmt(r.curMeanB), fmt(r.curAbsA), fmt(r.curAbsB),
+        fmt(r.incA), fmt(r.incB), fmt(r.cumA), fmt(r.cumB)].map(function(v){ return v === null ? '' : v; }).join(','));
+    });
+    saveTextFile('inclinometer-comparison.csv', lines.join('\n'));
+  });
+
+  // ---------- AGD-format export (DateTime;SensorName;Flags;SensorType;Unit;VALUE1;VALUE2) ----------
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  // Parses whatever date string we captured from either file format into
+  // a JS Date, or null if it doesn't recognise the pattern.
+  function parseSurveyDate(dateStr) {
+    if (!dateStr) return null;
+    // Geosense: "20260921_134220"  (yyyyMMdd_HHmmss)
+    var m = dateStr.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+    // RST: "08/28/2026 12:39:04"  (MM/DD/YYYY HH:mm:ss)
+    m = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})/);
+    if (m) return new Date(+m[3], +m[1] - 1, +m[2], +m[4], +m[5], +m[6]);
+    return null;
+  }
+
+  function formatAGDDate(d) {
+    return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' +
+           pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  // "INK-4" + depth 1.5  ->  "INK-4_1_5"   |   depth 6.0  ->  "INK-4_6"
+  function sensorName(borehole, depth) {
+    var whole = Math.floor(depth + 1e-6);
+    var isHalf = Math.round((depth - whole) * 10) === 5;
+    return borehole + '_' + whole + (isHalf ? '_5' : '');
+  }
+
+  document.getElementById('btn-download-agd').addEventListener('click', function() {
+    if (!state.merged || !state.ref || !state.cur) return;
+    var borehole = (state.cur.parsed.meta.borehole || state.ref.parsed.meta.borehole || 'BOREHOLE').trim();
+    var dateObj = parseSurveyDate(state.cur.parsed.meta.date) || parseSurveyDate(state.ref.parsed.meta.date) || new Date();
+    var dateStr = formatAGDDate(dateObj);
+
+    var lines = ['DateTime;SensorName;Flags;SensorType;Unit;VALUE1;VALUE2'];
+    state.merged.forEach(function(r) {
+      if (r.cumA === null || r.cumB === null) return; // needs both surveys at this depth
+      lines.push([dateStr, sensorName(borehole, r.depth), '', 'Position', 'mm',
+        String(r.cumA), String(r.cumB)].join(';'));
+    });
+    if (lines.length === 1) {
+      document.getElementById('status').textContent = 'No depths have both reference and current data — nothing to export.';
+      document.getElementById('status').className = 'status err';
+      return;
+    }
+    saveTextFile('AGD-export-' + borehole + '.csv', lines.join('\r\n') + '\r\n');
+  });
+
+})();
+</script>
+</body>
+</html>
