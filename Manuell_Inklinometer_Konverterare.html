@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #F4F5F1;
@@ -170,13 +171,75 @@
   }
   .badge.rst { background: #EFE6D2; color: #6B5320; }
   .badge.geosense { background: #DCEAE6; color: #1E5B4C; }
+  .badge.dux { background: #E2E2EF; color: #423D8C; }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .badge.rst { background: #3A331E; color: #E3C77E; }
     :root:not([data-theme="light"]) .badge.geosense { background: #1B332C; color: #8FD8C4; }
+    :root:not([data-theme="light"]) .badge.dux { background: #29273D; color: #B8B3EE; }
   }
   :root[data-theme="dark"] .badge.rst { background: #3A331E; color: #E3C77E; }
   :root[data-theme="dark"] .badge.geosense { background: #1B332C; color: #8FD8C4; }
+  :root[data-theme="dark"] .badge.dux { background: #29273D; color: #B8B3EE; }
   .badge.err { background: var(--danger-soft); color: var(--danger); }
+
+  select.survey-pick, input.text-input {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.8rem;
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 5px 8px;
+    margin-top: 8px;
+    width: 100%;
+  }
+  label.field-label {
+    display: block;
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    margin-bottom: 2px;
+  }
+
+  .pool-list {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .pool-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    border: 1px solid var(--panel-border);
+    border-radius: 7px;
+    font-size: 0.8rem;
+  }
+  .pool-item .swatch-dot {
+    width: 9px; height: 9px; border-radius: 50%; flex: none;
+  }
+  .pool-item label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .pool-item .pool-label {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pool-item .pool-sub {
+    color: var(--ink-soft);
+    font-size: 0.72rem;
+  }
+  .pool-item input[type="checkbox"] { flex: none; }
 
   .actions {
     display: flex;
@@ -345,7 +408,7 @@
   <header class="top">
     <div>
       <h1>CLINTON - Inclinometer splice: RST - Geosense - Soil</h1>
-      <div class="sub">Load a reference survey and a current survey (RST, Geosense or Soil raw export, either order) to compute mean deviation, absolute position, and displacement since baseline.</div>
+      <div class="sub">Load a reference survey and one or more current surveys (RST, Geosense or Soil raw export, either order) to compute and export mean deviation, absolute position, and displacement since baseline. - Ladda upp en nollmätning och en eller flera mätningar (RST, Geosense eller Soil rådatafiler) för att räkna fram och exportera medelavvikelse, abolutposition och utböjning mot nollmätningen.</div>
     </div>
   </header>
 
@@ -353,9 +416,9 @@
     <div class="card ref">
       <div class="role">REFERENCE / BASELINE</div>
       <h2>Reference survey</h2>
-      <p class="hint">The reference survey to compare against — e.g. the last RST reading before switching instruments.</p>
+      <p class="hint">The reference survey to compare against — Nollmätningen att jämföra mot</p>
       <label class="drop" id="drop-ref">
-        <input type="file" id="file-ref" accept=".csv,.txt">
+        <input type="file" id="file-ref" accept=".csv,.txt,.dux">
         <div id="drop-ref-text">Click to choose a file, or drag one here<br><span class="filename" id="ref-filename"></span></div>
       </label>
       <div id="ref-meta"></div>
@@ -363,20 +426,28 @@
 
     <div class="card cur">
       <div class="role">CURRENT</div>
-      <h2>Current survey</h2>
-      <p class="hint">The new reading — e.g. the the latest survey.</p>
+      <h2>Current survey(s)</h2>
+      <p class="hint">One or more new readings to compare against the reference — e.g. every Geosense reading taken so far. Add files one at a time or select several at once; each survey inside a file (.dux files can hold many) is listed below so you can pick which ones to include.
+        En eller flera nya mätningar att jämföra mot nollmätningar - t.ex. alla Geosense-mätningar som hittills gjorts. Lägg till filer en i taget eller markera flera på en gång; varje mätning i en fil (.dux-filer kan innehålla många) listas nedan så att du kan välja vilka du vill inkludera.
+      </p>
       <label class="drop" id="drop-cur">
-        <input type="file" id="file-cur" accept=".csv,.txt">
-        <div id="drop-cur-text">Click to choose a file, or drag one here<br><span class="filename" id="cur-filename"></span></div>
+        <input type="file" id="file-cur" accept=".csv,.txt,.dux" multiple>
+        <div id="drop-cur-text">Click to choose file(s), or drag them here<br><span class="filename" id="cur-filename"></span></div>
       </label>
-      <div id="cur-meta"></div>
+      <div id="cur-pool-list"></div>
     </div>
+  </div>
+
+  <div class="actions" id="cur-pool-actions" style="display:none; margin:10px 0 0;">
+    <button class="ghost" id="btn-cur-select-all" style="padding:6px 12px; font-size:0.8rem;">Select all</button>
+    <button class="ghost" id="btn-cur-select-none" style="padding:6px 12px; font-size:0.8rem;">Select none</button>
+    <button class="ghost" id="btn-cur-clear" style="padding:6px 12px; font-size:0.8rem;">Clear list</button>
   </div>
 
   <div class="actions">
     <button class="primary" id="btn-calc" disabled>Calculate</button>
     <button class="ghost" id="btn-download" disabled>Download CSV</button>
-    <button class="ghost" id="btn-download-agd" disabled>Export GEOvis AGD CSV</button>
+    <button class="ghost" id="btn-download-agd" disabled>Export AGD CSV</button>
     <span class="status" id="status"></span>
   </div>
 
@@ -386,10 +457,7 @@
       <button class="tab" data-tab="displacement">Displacement vs reference</button>
     </div>
 
-    <div class="legend">
-      <span><i class="swatch" style="background:var(--accent-ref)"></i> Reference</span>
-      <span><i class="swatch" style="background:var(--accent-cur)"></i> Current</span>
-    </div>
+    <div class="legend" id="legend"></div>
 
     <div class="charts" id="charts"></div>
 
@@ -399,6 +467,32 @@
   </div>
 
   <div class="formula-note" id="formula-note"></div>
+
+  <header class="top" style="margin-top:48px;">
+    <div>
+      <h1>Already-computed displacement → AGD</h1>
+      <div class="sub">For Soil Instruments / Gaudi exports that already contain cumulative displacement per depth per survey date (two sheets, axis A and axis B) — just pick the dates and it konverts it into AGD-format.
+        Soil Instruments-/Gaudi-exporter som redan innehåller kumulativ förskjutning per djup per mätdatum (två excelblad, axel A och axel B) — välj bara datum och konvertera det till AGD-format.
+      </div>
+    </div>
+  </header>
+
+  <div class="card" style="border-top:3px solid var(--accent-cur);">
+    <div class="role">SOIL / GAUDI EXPORT (.xlsx)</div>
+    <h2>Pre-computed displacement file</h2>
+    <p class="hint">Two sheets named "&lt;point&gt; A" and "&lt;point&gt; B", each with a depth column and one column per survey date. Pick one or more dates below to export together.</p>
+    <label class="drop" id="drop-gaudi">
+      <input type="file" id="file-gaudi" accept=".xlsx">
+      <div>Click to choose a file, or drag one here<br><span class="filename" id="gaudi-filename"></span></div>
+    </label>
+    <div id="gaudi-meta"></div>
+  </div>
+
+  <div class="actions">
+    <button class="ghost" id="btn-download-gaudi-agd" disabled>Export AGD CSV</button>
+    <span class="status" id="status-gaudi"></span>
+  </div>
+
 </div>
 
 <script>
@@ -430,6 +524,7 @@
   // ---------- format detection ----------
   function detectFormat(text) {
     var head = text.slice(0, 2000);
+    if (/^Installation v\d/im.test(head)) return 'dux';
     if (/File Version/i.test(head) && /Face A\+/i.test(text)) return 'rst';
     if (/Site Name\s*:/i.test(head) || /DEPTH_METRES/i.test(head)) return 'geosense';
     if (/Face A\+/i.test(text)) return 'rst';
@@ -525,7 +620,60 @@
     return { format: 'geosense', meta: meta, interval: interval, rawRows: rows };
   }
 
+  // ---------- DUX parser (Soil Instruments) ----------
+  // One file holds an "Installation" header line plus multiple stacked
+  // "Survey" blocks (one per reading date), each with its own calibration
+  // factor and a Depth,A+,A-,B+,B- table — same row shape as RST.
+  function parseDUX(text) {
+    var lines = text.split(/\r?\n/);
+    var installLine = lines.find(function(l) { return /^Installation v\d/i.test(l); });
+    if (!installLine) throw new Error('Could not find the "Installation v..." header line in this DUX file.');
+    var ip = splitLine(installLine, ',');
+    var site = ip[1] || '';
+    var boreholeNum = ip[2] || '';
+    var interval = parseNum(ip[7]) || 0.5;
+    var meta = { site: site, borehole: (site + '-' + boreholeNum).replace(/^-|-$/g, '') };
+
+    var surveys = [];
+    for (var i = 0; i < lines.length; i++) {
+      if (!/^Survey v\d/i.test(lines[i])) continue;
+      var sp = splitLine(lines[i], ',');
+      var date = sp[1];
+      var calFactor = parseNum(sp[5]) || 100000;
+      var rows = [];
+      var j = i + 1;
+      while (j < lines.length) {
+        var l = lines[j];
+        if (!l.trim()) { if (rows.length) break; else { j++; continue; } }
+        if (/^(Installation|Survey) v\d/i.test(l)) break;
+        var p = splitLine(l, ',');
+        var depth = parseNum(p[0]);
+        if (depth === null) { if (rows.length) break; else { j++; continue; } }
+        rows.push({ depth: Math.abs(depth), aPos: parseNum(p[1]), aNeg: parseNum(p[2]), bPos: parseNum(p[3]), bNeg: parseNum(p[4]) });
+        j++;
+      }
+      surveys.push({ date: date, calFactor: calFactor, rawRows: rows });
+      i = j - 1;
+    }
+    if (!surveys.length) throw new Error('No "Survey v..." blocks found in this DUX file.');
+    return { format: 'dux', meta: meta, interval: interval, surveys: surveys };
+  }
   // ---------- computation ----------
+  // Shared: integrate mean deviation bottom-up (deepest station = fixed 0
+  // reference) to get absolute position at every depth, for either axis.
+  function integrateBottomUp(stations) {
+    stations.sort(function(a, b) { return b.depth - a.depth; });
+    var runA = 0, runB = 0, haveA = false, haveB = false;
+    stations.forEach(function(s) {
+      if (s.meanDevA !== null) { runA += s.meanDevA; haveA = true; }
+      s.absA = haveA ? runA : null;
+      if (s.meanDevB !== null) { runB += s.meanDevB; haveB = true; }
+      s.absB = haveB ? runB : null;
+    });
+    stations.sort(function(a, b) { return a.depth - b.depth; });
+    return stations;
+  }
+
   // Produces, per depth: meanDevA, meanDevB (mm), then integrates bottom-up to absA, absB.
   function computeSeries(parsed) {
     var interval = parsed.interval;
@@ -551,19 +699,19 @@
       });
     }
 
-    // sort deepest first for bottom-up integration
-    stations.sort(function(a, b) { return b.depth - a.depth; });
-    var runA = 0, runB = 0;
-    var haveA = false, haveB = false;
-    stations.forEach(function(s) {
-      if (s.meanDevA !== null) { runA += s.meanDevA; haveA = true; }
-      s.absA = haveA ? runA : null;
-      if (s.meanDevB !== null) { runB += s.meanDevB; haveB = true; }
-      s.absB = haveB ? runB : null;
+    return integrateBottomUp(stations);
+  }
+
+  // DUX: counts -> sin(x)-equivalent via the survey's own calibration factor,
+  // then -> mm via gauge length, same paired-face bias cancellation as RST.
+  function computeDuxSurvey(rawRows, interval, calFactor) {
+    var gaugeMM = interval * 1000;
+    var stations = rawRows.filter(function(r) { return r.aPos !== null && r.aNeg !== null; }).map(function(r) {
+      var meanDevA = ((r.aPos - r.aNeg) / 2) / calFactor * gaugeMM;
+      var meanDevB = (r.bPos !== null && r.bNeg !== null) ? ((r.bPos - r.bNeg) / 2) / calFactor * gaugeMM : null;
+      return { depth: r.depth, meanDevA: meanDevA, meanDevB: meanDevB };
     });
-    // return sorted shallow-to-deep for display
-    stations.sort(function(a, b) { return a.depth - b.depth; });
-    return stations;
+    return integrateBottomUp(stations);
   }
 
   // ---------- merge two computed series by depth ----------
@@ -595,7 +743,13 @@
   }
 
   // ---------- state ----------
-  var state = { ref: null, cur: null, merged: null, activeTab: 'absolute' };
+  // curPool: every survey made available in the Current card (one entry per
+  // RST/Geosense file, or one entry per embedded survey for a DUX file).
+  // mergedList: one merge-against-reference result per *selected* pool entry.
+  var state = { ref: null, curPool: [], mergedList: [], activeTab: 'absolute' };
+  var nextPoolId = 1;
+  var PALETTE = ['#1D6F8C', '#3C8C4E', '#8C4E9A', '#B85C2E', '#2E7FB8', '#9A7A1D', '#5C6E9A', '#B84E6E'];
+  function colorForIndex(i) { return PALETTE[i % PALETTE.length]; }
 
   function fmt(n, d) {
     if (n === null || n === undefined || isNaN(n)) return null;
@@ -609,6 +763,27 @@
     reader.readAsText(file);
   }
 
+  function computedLabelDate(dateStr, fmtType) {
+    return dateStr || '';
+  }
+
+  function renderSurveyPicker(role, parsed) {
+    var pickId = role + '-survey-select';
+    var defaultIdx = 0;
+    var options = parsed.surveys.map(function(s, i) {
+      return '<option value="' + i + '"' + (i === defaultIdx ? ' selected' : '') + '>' + escapeHtml(s.date) + '</option>';
+    }).join('');
+    return '<label class="field-label">Survey (' + parsed.surveys.length + ' in file)</label>' +
+      '<select class="survey-pick" id="' + pickId + '">' + options + '</select>';
+  }
+
+  function setDuxSurvey(role, parsed, idx) {
+    var s = parsed.surveys[idx];
+    var computed = computeDuxSurvey(s.rawRows, parsed.interval, s.calFactor);
+    state[role] = { parsed: { format: 'dux', meta: { site: parsed.meta.site, borehole: parsed.meta.borehole, date: s.date }, interval: parsed.interval }, computed: computed, filename: state[role] ? state[role].filename : '' };
+  }
+
+  // ---------- Reference (single survey) ----------
   function handleFile(role, file) {
     var filenameEl = document.getElementById(role + '-filename');
     var metaEl = document.getElementById(role + '-meta');
@@ -618,31 +793,164 @@
       if (err) { metaEl.innerHTML = '<span class="badge err">Read error</span>'; return; }
       var fmtType = detectFormat(text);
       if (!fmtType) {
-        metaEl.innerHTML = '<span class="badge err">Format not recognised</span><div class="note">Please check that the file is an RST, Geosense or Soil raw data file.</div>';
+        metaEl.innerHTML = '<span class="badge err">Format not recognised</span><div class="note">Expected an RST, Geosense, or DUX raw export.</div>';
         state[role] = null;
         updateCalcButton();
         return;
       }
       try {
-        var parsed = fmtType === 'rst' ? parseRST(text) : parseGeosense(text);
-        var computed = computeSeries(parsed);
-        state[role] = { parsed: parsed, computed: computed, filename: file.name };
-        var badgeClass = fmtType === 'rst' ? 'rst' : 'geosense';
-        var badgeLabel = fmtType === 'rst' ? 'RST' : 'Geosense';
-        var metaHtml = '<span class="badge ' + badgeClass + '">' + badgeLabel + '</span>';
-        metaHtml += '<div class="meta">';
-        if (parsed.meta.site) metaHtml += '<span>Site</span><b>' + escapeHtml(parsed.meta.site) + '</b>';
-        if (parsed.meta.borehole) metaHtml += '<span>Borehole</span><b>' + escapeHtml(parsed.meta.borehole) + '</b>';
-        if (parsed.meta.date) metaHtml += '<span>Date</span><b>' + escapeHtml(parsed.meta.date) + '</b>';
-        metaHtml += '<span>Interval</span><b>' + parsed.interval + ' m</b>';
-        metaHtml += '<span>Stations</span><b>' + computed.length + '</b>';
-        metaHtml += '</div>';
-        metaEl.innerHTML = metaHtml;
+        if (fmtType === 'dux') {
+          var duxParsed = parseDUX(text);
+          duxParsed.filename = file.name;
+          setDuxSurvey(role, duxParsed, 0);
+          state[role].filename = file.name;
+          var metaHtml = '<span class="badge dux">DUX (Soil Instruments)</span><div class="meta">';
+          if (duxParsed.meta.site) metaHtml += '<span>Site</span><b>' + escapeHtml(duxParsed.meta.site) + '</b>';
+          if (duxParsed.meta.borehole) metaHtml += '<span>Borehole</span><b>' + escapeHtml(duxParsed.meta.borehole) + '</b>';
+          metaHtml += '<span>Interval</span><b>' + duxParsed.interval + ' m</b>';
+          metaHtml += '<span>Stations</span><b>' + state[role].computed.length + '</b>';
+          metaHtml += '</div>' + renderSurveyPicker(role, duxParsed);
+          metaEl.innerHTML = metaHtml;
+          document.getElementById(role + '-survey-select').addEventListener('change', function(e) {
+            setDuxSurvey(role, duxParsed, parseInt(e.target.value, 10));
+            state[role].filename = file.name;
+            recalcIfShown();
+          });
+        } else {
+          var parsed = fmtType === 'rst' ? parseRST(text) : parseGeosense(text);
+          var computed = computeSeries(parsed);
+          state[role] = { parsed: parsed, computed: computed, filename: file.name };
+          var badgeClass = fmtType === 'rst' ? 'rst' : 'geosense';
+          var badgeLabel = fmtType === 'rst' ? 'RST' : 'Geosense';
+          var metaHtml2 = '<span class="badge ' + badgeClass + '">' + badgeLabel + '</span>';
+          metaHtml2 += '<div class="meta">';
+          if (parsed.meta.site) metaHtml2 += '<span>Site</span><b>' + escapeHtml(parsed.meta.site) + '</b>';
+          if (parsed.meta.borehole) metaHtml2 += '<span>Borehole</span><b>' + escapeHtml(parsed.meta.borehole) + '</b>';
+          if (parsed.meta.date) metaHtml2 += '<span>Date</span><b>' + escapeHtml(parsed.meta.date) + '</b>';
+          metaHtml2 += '<span>Interval</span><b>' + parsed.interval + ' m</b>';
+          metaHtml2 += '<span>Stations</span><b>' + computed.length + '</b>';
+          metaHtml2 += '</div>';
+          metaEl.innerHTML = metaHtml2;
+        }
       } catch (e) {
         metaEl.innerHTML = '<span class="badge err">' + escapeHtml(e.message) + '</span>';
         state[role] = null;
       }
       updateCalcButton();
+    });
+  }
+
+  function recalcIfShown() {
+    if (state.mergedList && state.mergedList.length) { runCalculate(); }
+  }
+
+  // ---------- Current (pool of surveys — one file can contribute many) ----------
+  function addCurFile(file) {
+    readFile(file, function(err, text) {
+      if (err) { renderCurPool(); return; }
+      var fmtType = detectFormat(text);
+      if (!fmtType) {
+        state.curPool.push({ id: nextPoolId++, error: 'Format not recognised: ' + file.name, selected: false });
+        renderCurPool();
+        return;
+      }
+      try {
+        if (fmtType === 'dux') {
+          var duxParsed = parseDUX(text);
+          duxParsed.surveys.forEach(function(s) {
+            var computed = computeDuxSurvey(s.rawRows, duxParsed.interval, s.calFactor);
+            state.curPool.push({
+              id: nextPoolId++,
+              format: 'dux',
+              filename: file.name,
+              label: (duxParsed.meta.borehole || file.name),
+              date: s.date,
+              meta: { borehole: duxParsed.meta.borehole, date: s.date },
+              computed: computed,
+              selected: true
+            });
+          });
+        } else {
+          var parsed = fmtType === 'rst' ? parseRST(text) : parseGeosense(text);
+          var computed = computeSeries(parsed);
+          state.curPool.push({
+            id: nextPoolId++,
+            format: fmtType,
+            filename: file.name,
+            label: (parsed.meta.borehole || file.name),
+            date: parsed.meta.date || '',
+            meta: parsed.meta,
+            computed: computed,
+            selected: true
+          });
+        }
+      } catch (e) {
+        state.curPool.push({ id: nextPoolId++, error: file.name + ': ' + e.message, selected: false });
+      }
+      renderCurPool();
+      updateCalcButton();
+    });
+  }
+
+  function renderCurPool() {
+    var listEl = document.getElementById('cur-pool-list');
+    var actionsEl = document.getElementById('cur-pool-actions');
+    if (!state.curPool.length) { listEl.innerHTML = ''; actionsEl.style.display = 'none'; return; }
+    actionsEl.style.display = 'flex';
+    var selIdx = 0;
+    var html = '<div class="pool-list">';
+    state.curPool.forEach(function(entry) {
+      if (entry.error) {
+        html += '<div class="pool-item"><span class="badge err" style="margin:0;">' + escapeHtml(entry.error) + '</span></div>';
+        return;
+      }
+      var color = colorForIndex(selIdx); selIdx++;
+      var badgeClass = entry.format === 'rst' ? 'rst' : (entry.format === 'geosense' ? 'geosense' : 'dux');
+      var badgeLabel = entry.format === 'rst' ? 'RST' : (entry.format === 'geosense' ? 'Geosense' : 'DUX');
+      html += '<div class="pool-item">' +
+        '<input type="checkbox" data-id="' + entry.id + '"' + (entry.selected ? ' checked' : '') + '>' +
+        '<i class="swatch-dot" style="background:' + (entry.selected ? color : 'var(--panel-border)') + '"></i>' +
+        '<label>' +
+        '<span class="pool-label">' + escapeHtml(entry.date || entry.filename) + '</span>' +
+        '<span class="pool-sub">' + escapeHtml(entry.filename) + ' · <span class="badge ' + badgeClass + '" style="margin:0;">' + badgeLabel + '</span></span>' +
+        '</label>' +
+        '</div>';
+    });
+    html += '</div>';
+    listEl.innerHTML = html;
+    listEl.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var id = parseInt(cb.dataset.id, 10);
+        var entry = state.curPool.find(function(e) { return e.id === id; });
+        if (entry) entry.selected = cb.checked;
+        renderCurPool();
+        updateCalcButton();
+        recalcIfShown();
+      });
+    });
+  }
+
+  document.getElementById('btn-cur-select-all').addEventListener('click', function() {
+    state.curPool.forEach(function(e) { if (!e.error) e.selected = true; });
+    renderCurPool(); updateCalcButton(); recalcIfShown();
+  });
+  document.getElementById('btn-cur-select-none').addEventListener('click', function() {
+    state.curPool.forEach(function(e) { e.selected = false; });
+    renderCurPool(); updateCalcButton(); recalcIfShown();
+  });
+  document.getElementById('btn-cur-clear').addEventListener('click', function() {
+    state.curPool = [];
+    document.getElementById('cur-filename').textContent = '';
+    renderCurPool(); updateCalcButton();
+    state.mergedList = [];
+    document.getElementById('results').classList.remove('show');
+  });
+
+  function selectedCurEntries() {
+    var seen = 0;
+    return state.curPool.filter(function(e) { return !e.error && e.selected; }).map(function(e) {
+      e._colorIndex = seen++;
+      return e;
     });
   }
 
@@ -653,41 +961,77 @@
   }
 
   function updateCalcButton() {
-    document.getElementById('btn-calc').disabled = !(state.ref || state.cur);
+    document.getElementById('btn-calc').disabled = !(state.ref || selectedCurEntries().length);
   }
 
-  ['ref', 'cur'].forEach(function(role) {
-    var input = document.getElementById('file-' + role);
-    var drop = document.getElementById('drop-' + role);
-    input.addEventListener('change', function() {
-      if (input.files && input.files[0]) handleFile(role, input.files[0]);
-    });
+  document.getElementById('file-ref').addEventListener('change', function() {
+    if (this.files && this.files[0]) handleFile('ref', this.files[0]);
+  });
+  (function() {
+    var drop = document.getElementById('drop-ref');
     drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('drag'); });
     drop.addEventListener('dragleave', function() { drop.classList.remove('drag'); });
     drop.addEventListener('drop', function(e) {
       e.preventDefault();
       drop.classList.remove('drag');
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(role, e.dataTransfer.files[0]);
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile('ref', e.dataTransfer.files[0]);
     });
-  });
+  })();
 
-  document.getElementById('btn-calc').addEventListener('click', function() {
+  document.getElementById('file-cur').addEventListener('change', function() {
+    var files = Array.prototype.slice.call(this.files || []);
+    if (files.length) {
+      document.getElementById('cur-filename').textContent = files.length + ' file(s) added';
+      files.forEach(addCurFile);
+    }
+  });
+  (function() {
+    var drop = document.getElementById('drop-cur');
+    drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('drag'); });
+    drop.addEventListener('dragleave', function() { drop.classList.remove('drag'); });
+    drop.addEventListener('drop', function(e) {
+      e.preventDefault();
+      drop.classList.remove('drag');
+      var files = Array.prototype.slice.call((e.dataTransfer && e.dataTransfer.files) || []);
+      if (files.length) {
+        document.getElementById('cur-filename').textContent = files.length + ' file(s) added';
+        files.forEach(addCurFile);
+      }
+    });
+  })();
+
+  function runCalculate() {
     var refComputed = state.ref ? state.ref.computed : [];
-    var curComputed = state.cur ? state.cur.computed : [];
-    state.merged = mergeSeries(refComputed, curComputed);
+    var entries = selectedCurEntries();
+    if (!entries.length) {
+      state.mergedList = [{ label: 'Reference only', color: 'var(--accent-ref)', merged: mergeSeries(refComputed, []) }];
+    } else {
+      state.mergedList = entries.map(function(entry, i) {
+        return {
+          label: (entry.date || entry.filename),
+          sub: entry.filename,
+          color: colorForIndex(i),
+          merged: mergeSeries(refComputed, entry.computed),
+          meta: entry.meta,
+          format: entry.format
+        };
+      });
+    }
     renderResults();
     document.getElementById('results').classList.add('show');
     document.getElementById('btn-download').disabled = false;
-    document.getElementById('btn-download-agd').disabled = !(state.ref && state.cur);
+    document.getElementById('btn-download-agd').disabled = !(state.ref && entries.length);
     var statusEl = document.getElementById('status');
-    if (state.ref && state.cur) {
-      statusEl.textContent = state.merged.length + ' depth stations merged.';
+    if (state.ref && entries.length) {
+      statusEl.textContent = entries.length + ' current survey(s) merged against the reference.';
       statusEl.className = 'status';
     } else {
-      statusEl.textContent = 'Only one survey loaded — showing its profile without displacement.';
+      statusEl.textContent = 'Only one side loaded — showing its profile without displacement.';
       statusEl.className = 'status';
     }
-  });
+  }
+
+  document.getElementById('btn-calc').addEventListener('click', runCalculate);
 
   document.querySelectorAll('.tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
@@ -699,20 +1043,21 @@
   });
 
   // ---------- SVG chart ----------
-  function drawChart(rows, keyA, keyB, axisLabel, unitLabel) {
+  // refPoints: [{depth, value}] — one shared reference line.
+  // series: [{color, points:[{depth, value}]}] — one line per current survey.
+  function drawChart(refPoints, series, unitLabel) {
     var w = 320, h = 420;
     var padL = 46, padR = 14, padT = 10, padB = 30;
     var plotW = w - padL - padR, plotH = h - padT - padB;
 
     var vals = [];
-    rows.forEach(function(r) {
-      if (r[keyA + 'ref'] !== null && r[keyA + 'ref'] !== undefined) vals.push(r[keyA + 'ref']);
-      if (r[keyA + 'cur'] !== null && r[keyA + 'cur'] !== undefined) vals.push(r[keyA + 'cur']);
-    });
+    (refPoints || []).forEach(function(p) { if (p.value !== null && p.value !== undefined) vals.push(p.value); });
+    series.forEach(function(s) { s.points.forEach(function(p) { if (p.value !== null && p.value !== undefined) vals.push(p.value); }); });
     var maxAbs = Math.max(10, vals.reduce(function(m, v) { return Math.max(m, Math.abs(v)); }, 0));
     maxAbs = Math.ceil(maxAbs / 5) * 5;
 
-    var depths = rows.map(function(r) { return r.depth; });
+    var depths = (refPoints || []).map(function(p) { return p.depth; });
+    series.forEach(function(s) { s.points.forEach(function(p) { depths.push(p.depth); }); });
     var minD = 0, maxD = Math.max.apply(null, depths.concat([1]));
 
     function x(v) { return padL + ((v + maxAbs) / (2 * maxAbs)) * plotW; }
@@ -720,7 +1065,6 @@
 
     var svg = '<svg class="plot" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
 
-    // gridlines (vertical, value)
     var gridSteps = 4;
     for (var i = -gridSteps; i <= gridSteps; i++) {
       var gv = (maxAbs / gridSteps) * i;
@@ -728,10 +1072,8 @@
       svg += '<line class="gridline" x1="' + gx + '" y1="' + padT + '" x2="' + gx + '" y2="' + (padT + plotH) + '"/>';
       svg += '<text x="' + gx + '" y="' + (padT + plotH + 16) + '" font-size="9" text-anchor="middle">' + gv.toFixed(0) + '</text>';
     }
-    // zero line
     svg += '<line class="zero" x1="' + x(0) + '" y1="' + padT + '" x2="' + x(0) + '" y2="' + (padT + plotH) + '"/>';
 
-    // depth gridlines (horizontal)
     var dStep = Math.ceil(maxD / 6 / 0.5) * 0.5 || 0.5;
     for (var dd = 0; dd <= maxD + 0.001; dd += dStep) {
       var gy = y(dd);
@@ -739,25 +1081,27 @@
       svg += '<text x="' + (padL - 6) + '" y="' + (gy + 3) + '" font-size="9" text-anchor="end">' + dd.toFixed(1) + '</text>';
     }
 
-    function buildPath(field) {
-      var pts = rows.filter(function(r) { return r[field] !== null && r[field] !== undefined; })
-                    .map(function(r) { return { x: x(r[field]), y: y(r.depth) }; });
-      if (!pts.length) return null;
+    function buildPath(points, colorClass) {
+      var pts = points.filter(function(p) { return p.value !== null && p.value !== undefined; })
+                       .map(function(p) { return { x: x(p.value), y: y(p.depth) }; });
+      if (!pts.length) return '';
       var d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
       for (var i = 1; i < pts.length; i++) d += ' L ' + pts[i].x.toFixed(1) + ' ' + pts[i].y.toFixed(1);
-      return { d: d, pts: pts };
+      var out = '<path class="' + colorClass + '" d="' + d + '"/>';
+      pts.forEach(function(p) { out += '<circle class="' + colorClass.replace('line-', 'pt-') + '" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
+      return out;
     }
 
-    var refPath = buildPath(keyA + 'ref');
-    var curPath = buildPath(keyA + 'cur');
-    if (refPath) {
-      svg += '<path class="line-ref" d="' + refPath.d + '"/>';
-      refPath.pts.forEach(function(p) { svg += '<circle class="pt-ref" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
-    }
-    if (curPath) {
-      svg += '<path class="line-cur" d="' + curPath.d + '"/>';
-      curPath.pts.forEach(function(p) { svg += '<circle class="pt-cur" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
-    }
+    if (refPoints && refPoints.length) svg += buildPath(refPoints, 'line-ref');
+    series.forEach(function(s) {
+      var pts = s.points.filter(function(p) { return p.value !== null && p.value !== undefined; })
+                         .map(function(p) { return { x: x(p.value), y: y(p.depth) }; });
+      if (!pts.length) return;
+      var d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+      for (var i = 1; i < pts.length; i++) d += ' L ' + pts[i].x.toFixed(1) + ' ' + pts[i].y.toFixed(1);
+      svg += '<path fill="none" stroke="' + s.color + '" stroke-width="2" d="' + d + '"/>';
+      pts.forEach(function(p) { svg += '<circle fill="' + s.color + '" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
+    });
 
     svg += '<text x="' + (padL + plotW / 2) + '" y="' + (h - 4) + '" font-size="9" text-anchor="middle">' + unitLabel + '</text>';
     svg += '</svg>';
@@ -765,31 +1109,41 @@
   }
 
   function renderResults() {
-    if (!state.merged) return;
-    var rows = state.merged;
+    if (!state.mergedList || !state.mergedList.length) return;
     var isAbs = state.activeTab === 'absolute';
 
-    var chartRowsA = rows.map(function(r) {
-      var o = { depth: r.depth };
-      o['Aref'] = isAbs ? r.refAbsA : r.cumA;
-      o['Acur'] = isAbs ? r.curAbsA : r.cumA;
-      return o;
+    // Reference line: shared across all entries, so take it from the first one.
+    var refPoints = (state.mergedList[0].merged || []).filter(function(r) { return r.refAbsA !== null; })
+      .map(function(r) { return { depth: r.depth, value: r.refAbsA }; });
+    var refPointsB = (state.mergedList[0].merged || []).filter(function(r) { return r.refAbsB !== null; })
+      .map(function(r) { return { depth: r.depth, value: r.refAbsB }; });
+
+    var seriesA = state.mergedList.map(function(m) {
+      return { color: m.color, points: m.merged.map(function(r) { return { depth: r.depth, value: isAbs ? r.curAbsA : r.cumA }; }) };
     });
-    // For displacement tab there's only one series (cur vs ref delta) — draw it as "current"
+    var seriesB = state.mergedList.map(function(m) {
+      return { color: m.color, points: m.merged.map(function(r) { return { depth: r.depth, value: isAbs ? r.curAbsB : r.cumB }; }) };
+    });
+
     var chartsHtml = '';
     chartsHtml += '<div class="chart-box"><h3>Axis A</h3>' +
-      drawChart(rows.map(function(r){return {depth:r.depth, Aref:isAbs?r.refAbsA:r.cumA, Acur:isAbs?r.curAbsA:(isAbs?null:r.cumA)};}), 'A', null, 'A', isAbs ? 'mm' : 'mm since reference') +
-      '</div>';
+      drawChart(isAbs ? refPoints : [], seriesA, isAbs ? 'mm' : 'mm since reference') + '</div>';
     chartsHtml += '<div class="chart-box"><h3>Axis B</h3>' +
-      drawChart(rows.map(function(r){return {depth:r.depth, Aref:isAbs?r.refAbsB:r.cumB, Acur:isAbs?r.curAbsB:(isAbs?null:r.cumB)};}), 'A', null, 'B', isAbs ? 'mm' : 'mm since reference') +
-      '</div>';
+      drawChart(isAbs ? refPointsB : [], seriesB, isAbs ? 'mm' : 'mm since reference') + '</div>';
     document.getElementById('charts').innerHTML = chartsHtml;
 
-    // table
+    // legend
+    var legendHtml = '<span><i class="swatch" style="background:var(--accent-ref)"></i> Reference</span>';
+    state.mergedList.forEach(function(m) {
+      legendHtml += '<span><i class="swatch" style="background:' + m.color + '"></i> ' + escapeHtml(m.label) + '</span>';
+    });
+    document.getElementById('legend').innerHTML = legendHtml;
+
+    // table (long format: one block of rows per current survey)
     var table = document.getElementById('data-table');
     var caption = isAbs ? 'Mean deviation & absolute position, per depth' : 'Displacement vs reference, per depth';
     var head = '<caption>' + caption + '</caption><thead><tr>' +
-      '<th>Depth (m)</th>' +
+      '<th>Survey</th><th>Depth (m)</th>' +
       '<th class="grp-ref">Ref mean dev A</th><th class="grp-ref">Ref mean dev B</th>' +
       '<th class="grp-ref">Ref absolute A</th><th class="grp-ref">Ref absolute B</th>' +
       '<th class="grp-cur">Cur mean dev A</th><th class="grp-cur">Cur mean dev B</th>' +
@@ -798,13 +1152,16 @@
       '<th>Cumulative A</th><th>Cumulative B</th>' +
       '</tr></thead>';
     var body = '<tbody>';
-    rows.forEach(function(r) {
-      function cell(v) { var s = fmt(v); return s === null ? '<td class="empty-cell">—</td>' : '<td>' + s + '</td>'; }
-      body += '<tr><td>' + r.depth.toFixed(2) + '</td>' +
-        cell(r.refMeanA) + cell(r.refMeanB) + cell(r.refAbsA) + cell(r.refAbsB) +
-        cell(r.curMeanA) + cell(r.curMeanB) + cell(r.curAbsA) + cell(r.curAbsB) +
-        cell(r.incA) + cell(r.incB) + cell(r.cumA) + cell(r.cumB) +
-        '</tr>';
+    function cell(v) { var s = fmt(v); return s === null ? '<td class="empty-cell">—</td>' : '<td>' + s + '</td>'; }
+    state.mergedList.forEach(function(m) {
+      m.merged.forEach(function(r, idx) {
+        body += '<tr>' + (idx === 0 ? '<td rowspan="' + m.merged.length + '" style="vertical-align:top;"><i class="swatch-dot" style="background:' + m.color + '; display:inline-block; margin-right:5px;"></i>' + escapeHtml(m.label) + '</td>' : '') +
+          '<td>' + r.depth.toFixed(2) + '</td>' +
+          cell(r.refMeanA) + cell(r.refMeanB) + cell(r.refAbsA) + cell(r.refAbsB) +
+          cell(r.curMeanA) + cell(r.curMeanB) + cell(r.curAbsA) + cell(r.curAbsB) +
+          cell(r.incA) + cell(r.incB) + cell(r.cumA) + cell(r.cumB) +
+          '</tr>';
+      });
     });
     body += '</tbody>';
     table.innerHTML = head + body;
@@ -812,8 +1169,9 @@
     document.getElementById('formula-note').innerHTML =
       'RST: <code>MEAN_DEVIATION = ((Face+ − Face−) / 2) × 1000</code>. ' +
       'Geosense: <code>MM = SINX × interval(mm)</code>, <code>MEAN_DEVIATION = (POS_MM − NEG_MM) / 2</code>. ' +
-      'Both: <code>ABSOLUTE(depth)</code> is the running sum of mean deviation, integrated from the deepest station upward (bottom of casing = fixed 0). ' +
-      '<code>CUMULATIVE DISPLACEMENT = current absolute − reference absolute</code> at each matching depth.';
+      'DUX (Soil Instruments): counts are divided by the survey\'s own calibration factor, then treated like Geosense\'s SINX. ' +
+      'All formats: <code>ABSOLUTE(depth)</code> is the running sum of mean deviation, integrated from the deepest station upward (bottom of casing = fixed 0). ' +
+      '<code>CUMULATIVE DISPLACEMENT = current absolute − reference absolute</code> at each matching depth, for each selected current survey against the one reference.';
   }
 
   // ---------- shared file-save helper ----------
@@ -844,17 +1202,19 @@
     }
   }
 
-  // ---------- CSV download (full comparison table) ----------
+  // ---------- CSV download (full comparison table, long format) ----------
   document.getElementById('btn-download').addEventListener('click', function() {
-    if (!state.merged) return;
-    var header = ['Depth_m','Ref_MeanDev_A_mm','Ref_MeanDev_B_mm','Ref_Absolute_A_mm','Ref_Absolute_B_mm',
+    if (!state.mergedList || !state.mergedList.length) return;
+    var header = ['Survey','Depth_m','Ref_MeanDev_A_mm','Ref_MeanDev_B_mm','Ref_Absolute_A_mm','Ref_Absolute_B_mm',
       'Cur_MeanDev_A_mm','Cur_MeanDev_B_mm','Cur_Absolute_A_mm','Cur_Absolute_B_mm',
       'Incremental_A_mm','Incremental_B_mm','Cumulative_A_mm','Cumulative_B_mm'];
     var lines = [header.join(',')];
-    state.merged.forEach(function(r) {
-      lines.push([r.depth.toFixed(3), fmt(r.refMeanA), fmt(r.refMeanB), fmt(r.refAbsA), fmt(r.refAbsB),
-        fmt(r.curMeanA), fmt(r.curMeanB), fmt(r.curAbsA), fmt(r.curAbsB),
-        fmt(r.incA), fmt(r.incB), fmt(r.cumA), fmt(r.cumB)].map(function(v){ return v === null ? '' : v; }).join(','));
+    state.mergedList.forEach(function(m) {
+      m.merged.forEach(function(r) {
+        lines.push(['"' + m.label.replace(/"/g, '""') + '"', r.depth.toFixed(3), fmt(r.refMeanA), fmt(r.refMeanB), fmt(r.refAbsA), fmt(r.refAbsB),
+          fmt(r.curMeanA), fmt(r.curMeanB), fmt(r.curAbsA), fmt(r.curAbsB),
+          fmt(r.incA), fmt(r.incB), fmt(r.cumA), fmt(r.cumB)].map(function(v){ return v === null ? '' : v; }).join(','));
+      });
     });
     saveTextFile('inclinometer-comparison.csv', lines.join('\n'));
   });
@@ -868,6 +1228,9 @@
     if (!dateStr) return null;
     // Geosense: "20260921_134220"  (yyyyMMdd_HHmmss)
     var m = dateStr.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+    // DUX: "2026/07/09 10:59:02"  (yyyy/MM/dd HH:mm:ss)
+    m = dateStr.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2}):(\d{2})/);
     if (m) return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
     // RST: "08/28/2026 12:39:04"  (MM/DD/YYYY HH:mm:ss)
     m = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})/);
@@ -888,23 +1251,199 @@
   }
 
   document.getElementById('btn-download-agd').addEventListener('click', function() {
-    if (!state.merged || !state.ref || !state.cur) return;
-    var borehole = (state.cur.parsed.meta.borehole || state.ref.parsed.meta.borehole || 'BOREHOLE').trim();
-    var dateObj = parseSurveyDate(state.cur.parsed.meta.date) || parseSurveyDate(state.ref.parsed.meta.date) || new Date();
-    var dateStr = formatAGDDate(dateObj);
-
+    if (!state.ref || !state.mergedList || !state.mergedList.length) return;
+    var refBorehole = (state.ref.parsed && state.ref.parsed.meta.borehole) || 'BOREHOLE';
     var lines = ['DateTime;SensorName;Flags;SensorType;Unit;VALUE1;VALUE2'];
-    state.merged.forEach(function(r) {
-      if (r.cumA === null || r.cumB === null) return; // needs both surveys at this depth
-      lines.push([dateStr, sensorName(borehole, r.depth), '', 'Position', 'mm',
-        String(r.cumA), String(r.cumB)].join(';'));
+    state.mergedList.forEach(function(m) {
+      if (!m.meta) return; // the "Reference only" placeholder has no current survey to export
+      var borehole = (m.meta.borehole || refBorehole || 'BOREHOLE').trim();
+      var dateObj = parseSurveyDate(m.meta.date) ||
+        (state.ref.parsed && parseSurveyDate(state.ref.parsed.meta.date)) || new Date();
+      var dateStr = formatAGDDate(dateObj);
+      m.merged.forEach(function(r) {
+        if (r.cumA === null || r.cumB === null) return; // needs both surveys at this depth
+        lines.push([dateStr, sensorName(borehole, r.depth), '', 'Position', 'mm',
+          String(r.cumA), String(r.cumB)].join(';'));
+      });
     });
     if (lines.length === 1) {
       document.getElementById('status').textContent = 'No depths have both reference and current data — nothing to export.';
       document.getElementById('status').className = 'status err';
       return;
     }
-    saveTextFile('AGD-export-' + borehole + '.csv', lines.join('\r\n') + '\r\n');
+    saveTextFile('AGD-export-' + refBorehole.trim() + '.csv', lines.join('\r\n') + '\r\n');
+  });
+
+  // ---------- Soil/Gaudi pre-computed xlsx -> AGD export ----------
+  // These files already contain cumulative displacement (mm) per depth per
+  // survey date, split across two sheets (axis A, axis B). Depths are given
+  // as an elevation-style value (decreasing downward), not depth-from-top,
+  // so we recover depth-from-top assuming the shallowest row sits at 0.5 m
+  // and dropping a trailing "anchor" row whose spacing breaks the pattern.
+  var gaudiState = null;
+
+  function findAxisSheets(workbook) {
+    var names = workbook.SheetNames;
+    var aName = names.find(function(n) { return /\sA$/i.test(n); });
+    var bName = names.find(function(n) { return /\sB$/i.test(n); });
+    if (aName && bName) return { a: aName, b: bName };
+    return { a: names[0], b: names[1] };
+  }
+
+  function sheetToRows(ws) {
+    return XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+  }
+
+  function parseGaudiWorkbook(workbook) {
+    var axisSheets = findAxisSheets(workbook);
+    var rowsA = sheetToRows(workbook.Sheets[axisSheets.a]);
+    var rowsB = sheetToRows(workbook.Sheets[axisSheets.b]);
+    var nameRow = rowsA.find(function(r) { return r[0] === 'Name'; });
+    var pointName = nameRow ? String(nameRow[1]) : 'POINT';
+    var headerRowIdx = rowsA.findIndex(function(r) { return r[1] instanceof Date; });
+    if (headerRowIdx === -1) throw new Error('Could not find the survey-date header row (expected dates starting in column B).');
+    var dateRow = rowsA[headerRowIdx];
+    var dates = [];
+    for (var c = 1; c < dateRow.length; c++) { if (dateRow[c] instanceof Date) dates.push({ col: c, date: dateRow[c] }); }
+
+    var dataRowsA = rowsA.slice(headerRowIdx + 1).filter(function(r) { return r[0] !== null && r[0] !== undefined && r[0] !== ''; });
+    var dataRowsB = rowsB.slice(headerRowIdx + 1).filter(function(r) { return r[0] !== null && r[0] !== undefined && r[0] !== ''; });
+
+    var elevations = dataRowsA.map(function(r) { return parseFloat(r[0]); });
+    var diffs = [];
+    for (var i = 0; i < elevations.length - 1; i++) diffs.push(+(elevations[i] - elevations[i + 1]).toFixed(3));
+    var counts = {};
+    diffs.forEach(function(d) { counts[d] = (counts[d] || 0) + 1; });
+    var modal = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; })[0];
+    modal = modal !== undefined ? parseFloat(modal) : 0.5;
+
+    // Keep every row, including a trailing fixed-toe "anchor" row (usually all
+    // zeros) whose spacing to the previous row often doesn't match the modal
+    // interval — snap depths to the interval grid so that row still gets a
+    // clean label instead of an odd fractional depth.
+    var firstElev = elevations[0];
+    var stations = [];
+    for (var r = 0; r < elevations.length; r++) {
+      var rawDepth = 0.5 + (firstElev - elevations[r]);
+      var depthFromTop = +(Math.round(rawDepth / modal) * modal).toFixed(3);
+      stations.push({ depth: depthFromTop, rowA: dataRowsA[r], rowB: dataRowsB[r] });
+    }
+
+    return { pointName: pointName, dates: dates, stations: stations, interval: Math.abs(modal) };
+  }
+
+  document.getElementById('file-gaudi').addEventListener('change', function() {
+    var file = this.files && this.files[0];
+    if (file) handleGaudiFile(file);
+  });
+  (function() {
+    var drop = document.getElementById('drop-gaudi');
+    drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('drag'); });
+    drop.addEventListener('dragleave', function() { drop.classList.remove('drag'); });
+    drop.addEventListener('drop', function(e) {
+      e.preventDefault();
+      drop.classList.remove('drag');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) handleGaudiFile(e.dataTransfer.files[0]);
+    });
+  })();
+
+  function handleGaudiFile(file) {
+    var metaEl = document.getElementById('gaudi-meta');
+    var filenameEl = document.getElementById('gaudi-filename');
+    filenameEl.textContent = file.name;
+    metaEl.innerHTML = '';
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+        var parsed = parseGaudiWorkbook(wb);
+        parsed.dates.forEach(function(d, i) { d.selected = (i === parsed.dates.length - 1); }); // default: most recent only
+        gaudiState = parsed;
+        renderGaudiMeta();
+        document.getElementById('btn-download-gaudi-agd').disabled = false;
+      } catch (err) {
+        metaEl.innerHTML = '<span class="badge err">' + escapeHtml(err.message) + '</span>';
+        gaudiState = null;
+        document.getElementById('btn-download-gaudi-agd').disabled = true;
+      }
+    };
+    reader.onerror = function() {
+      metaEl.innerHTML = '<span class="badge err">Read error</span>';
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function renderGaudiMeta() {
+    var metaEl = document.getElementById('gaudi-meta');
+    var parsed = gaudiState;
+    var dateItems = parsed.dates.map(function(d, i) {
+      return '<div class="pool-item">' +
+        '<input type="checkbox" data-idx="' + i + '"' + (d.selected ? ' checked' : '') + '>' +
+        '<i class="swatch-dot" style="background:' + (d.selected ? colorForIndex(i) : 'var(--panel-border)') + '"></i>' +
+        '<label><span class="pool-label">' + formatAGDDate(d.date) + '</span></label>' +
+        '</div>';
+    }).join('');
+    var html = '<span class="badge geosense">Soil / Gaudi</span><div class="meta">' +
+      '<span>Point</span><b>' + escapeHtml(parsed.pointName) + '</b>' +
+      '<span>Stations</span><b>' + parsed.stations.length + '</b>' +
+      '<span>Interval</span><b>' + parsed.interval + ' m (assumed)</b>' +
+      '</div>' +
+      '<label class="field-label">Borehole / sensor prefix for AGD SensorName</label>' +
+      '<input class="text-input" id="gaudi-borehole" value="' + escapeHtml(parsed.pointName) + '">' +
+      '<label class="field-label">Survey date(s) to export</label>' +
+      '<div class="pool-list">' + dateItems + '</div>' +
+      '<div class="actions" style="margin:8px 0 0;">' +
+      '<button class="ghost" id="btn-gaudi-select-all" style="padding:6px 12px; font-size:0.8rem;">Select all</button>' +
+      '<button class="ghost" id="btn-gaudi-select-none" style="padding:6px 12px; font-size:0.8rem;">Select none</button>' +
+      '</div>';
+    metaEl.innerHTML = html;
+    metaEl.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        gaudiState.dates[parseInt(cb.dataset.idx, 10)].selected = cb.checked;
+        renderGaudiMeta();
+      });
+    });
+    var boreholeInput = document.getElementById('gaudi-borehole');
+    var prevBorehole = boreholeInput ? boreholeInput.value : null;
+    if (prevBorehole !== null) document.getElementById('gaudi-borehole').value = prevBorehole;
+    document.getElementById('btn-gaudi-select-all').addEventListener('click', function() {
+      gaudiState.dates.forEach(function(d) { d.selected = true; }); renderGaudiMeta();
+    });
+    document.getElementById('btn-gaudi-select-none').addEventListener('click', function() {
+      gaudiState.dates.forEach(function(d) { d.selected = false; }); renderGaudiMeta();
+    });
+  }
+
+  document.getElementById('btn-download-gaudi-agd').addEventListener('click', function() {
+    if (!gaudiState) return;
+    var boreholeInput = document.getElementById('gaudi-borehole');
+    var borehole = (boreholeInput ? boreholeInput.value : gaudiState.pointName).trim();
+    var selectedDates = gaudiState.dates.filter(function(d) { return d.selected; });
+    if (!selectedDates.length) {
+      document.getElementById('status-gaudi').textContent = 'Select at least one survey date to export.';
+      document.getElementById('status-gaudi').className = 'status err';
+      return;
+    }
+
+    var lines = ['DateTime;SensorName;Flags;SensorType;Unit;VALUE1;VALUE2'];
+    selectedDates.forEach(function(dateEntry) {
+      var dateStr = formatAGDDate(dateEntry.date);
+      var col = dateEntry.col;
+      gaudiState.stations.forEach(function(s) {
+        var v1 = s.rowA[col], v2 = s.rowB[col];
+        if (v1 === null || v1 === undefined || v2 === null || v2 === undefined) return;
+        lines.push([dateStr, sensorName(borehole, s.depth), '', 'Position', 'mm', String(v1), String(v2)].join(';'));
+      });
+    });
+    if (lines.length === 1) {
+      document.getElementById('status-gaudi').textContent = 'No values found for the selected date(s).';
+      document.getElementById('status-gaudi').className = 'status err';
+      return;
+    }
+    saveTextFile('AGD-export-' + borehole + '.csv', lines.join('\r\n') + '\r\n').then(function() {
+      document.getElementById('status-gaudi').textContent = 'AGD CSV saved (' + selectedDates.length + ' survey date(s)).';
+      document.getElementById('status-gaudi').className = 'status';
+    });
   });
 
 })();
